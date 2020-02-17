@@ -12,15 +12,21 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatCardModule} from '@angular/material/card'
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
-
-
-
+import {MatFormFieldModule} from '@angular/material/form-field';
+import { HomeComponent } from './home/home.component';
+import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
+import { BotBarComponent } from './components/bot-bar/bot-bar.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HsmLoginComponent,
     TopBarComponent,
+    HomeComponent,
+    LoginComponent,
+    RegisterComponent,
+    BotBarComponent,
   ],
   imports: [
     MatIconModule,
@@ -33,6 +39,7 @@ import {MatButtonModule} from '@angular/material/button';
     MatDialogModule,
     MatButtonModule,
     ReactiveFormsModule,
+    MatFormFieldModule,
     RouterModule.forRoot([
       {
         path: '', component: HsmLoginComponent

@@ -3,30 +3,37 @@
         <img style="width: 25%; height: 25%;" src="../../../assets/images/Shield.png" alt="HSM">
     </div>
     <div id="loginBox">
-        <h1>Login</h1>
+        <h1>Register</h1>
         <div style="margin-left: 10px;">
             <div class="form-group">
+                <div>
+                    <label id="letters" for="username">First Name</label>
+                </div>
+                <div>
+                    <input type="text">
+                </div>
+                <div>
+                    <label id="letters" for="username">Last Name</label>
+                </div>
+                <div>
+                    <input type="text">
+                </div>
                 <div>
                     <label id="letters" for="username">User Name</label>
                 </div>
                 <div>
                     <input type="text">
                 </div>
-                <br>
                 <div>
                     <label id="letters" for="password">Password</label>
                 </div>
-                
                 <div>
                     <input type="text">
                 </div>
-
+                <br>
                 <button id="loginBtn" (click)="onClickMe()" style="color:white !important"
                     mat-raised-button>Login</button>
-
-                <a [routerLink]="['/register']">
-                    <button id="registerBtn" mat-button color="primary">Register</button>
-                </a>
+                <button id="registerBtn" mat-button color="primary">Register</button>
             </div>
         </div>
     </div>

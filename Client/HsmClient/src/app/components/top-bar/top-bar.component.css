@@ -1,0 +1,15 @@
+#homeBtn {
+    color: #FFFFFF;
+    float: left;
+    font-size: 35px;
+    padding-right: 65px;
+}
+
+h1 {
+    min-width: 600px;
+}
+
+#navBtn {
+    float: right;
+    margin: 5px;
+}

@@ -11,6 +11,9 @@ import { first } from 'rxjs/operators';
 })
 export class HsmLoginComponent implements OnInit {
   loginForm: FormGroup;
+  loading = false;
+  submitted = false;
+  returnUrl: string;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -20,10 +23,16 @@ export class HsmLoginComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-  //  this.loginForm = this.formBuilder.group({
-  //    username: ['', Validators.required],
- //     password: ['', Validators.required]
-  //  });
+   this.loginForm = this.formBuilder.group({
+     username: ['', Validators.required],
+     password: ['', Validators.required]
+   });
 
   }
+
+  onClickMe() {
+    console.log(this.loginForm.get('username').value);
+  }
+
+  
 }

@@ -3,6 +3,36 @@
 </div>
 
 
-  <div class="center">
+  <div class="center" slot="">
     <router-outlet></router-outlet>
   </div>
+
+
+  <!-- nav -->
+<nav class="navbar navbar-expand navbar-dark bg-dark">
+    <div class="navbar-nav">
+        <a class="nav-item nav-link" routerLink="/">Home</a>
+        <a class="nav-item nav-link" routerLink="/login">Login</a>
+        <a class="nav-item nav-link" routerLink="/register">Register</a>
+        <a class="nav-item nav-link" routerLink="/test">Hsm</a>
+    </div>
+</nav>
+
+<!-- main content container -->
+<div class="jumbotron">
+    <div class="container">
+        <div class="row">
+            <div style="margin-left: 20px;" class="col-sm-8 offset-sm-2">
+                <router-outlet></router-outlet>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+"class="container">
+  <app-bot-bar></app-bot-bar>
+</div>
