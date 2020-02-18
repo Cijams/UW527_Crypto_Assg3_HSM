@@ -30,10 +30,16 @@
                 <div>
                     <input type="text">
                 </div>
-                <br>
-                <button id="loginBtn" (click)="onClickMe()" style="color:white !important"
-                    mat-raised-button>Login</button>
-                <button id="registerBtn" mat-button color="primary">Register</button>
+
+                <button id="createBtn" (click)="onClickMe()" style="color:white !important" mat-raised-button>Create
+                </button>
+                <div style="padding-top: 30px;">
+                    <h3 style="float: left; padding-right: 10px;">Already have an account?</h3>
+                    <a [routerLink]="['/login']">
+                    <button class="loginBtn" (click)="onClickMe()" style="color:#7F0000 !important; background-color: #F0F0F0;" mat-raised-button>Login
+                    </button>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
