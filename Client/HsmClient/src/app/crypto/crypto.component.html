@@ -9,7 +9,7 @@
                 <!-- Buttons -->
                 <span>
                     <div>
-                        <button id="loginBtn" style="color:white !important; width: 125px;" mat-raised-button>Generate Keys</button>
+                        <button id="loginBtn" style="color:white !important; width: 125px;" mat-raised-button (click)="getAllNotebooks()">Generate Keys</button>
                     </div>
                     <br>
                     <div>
@@ -40,9 +40,9 @@
 
                     <br>
                     <form>
-                        <mat-form-field>
+                        <!-- <mat-form-field> -->
                             <textarea class="encryptField" matInput placeholder="Text to encrypt..."></textarea>
-                        </mat-form-field>
+                        <!-- </mat-form-field> -->
                     </form>
                 </span>
             </div>

@@ -1,19 +1,30 @@
 package com.example.springboot;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @RestController
-public class HelloController {
+public class CryptoController {
 
 	@RequestMapping("/")
 	public String index() {
 		return "Server Up";
 	}
 
-	@RequestMapping("/hash")
-	public String hash() {
-		return "Hash Called";
+	@CrossOrigin
+	@GetMapping("/hash")
+	public ResponseEntity<String> hash() {
+
+		return new ResponseEntity<>("You Called Hash", HttpStatus.OK);
 	}
 
 	@RequestMapping("/encrypt")
