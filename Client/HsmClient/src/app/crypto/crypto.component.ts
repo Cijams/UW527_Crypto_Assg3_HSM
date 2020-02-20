@@ -15,13 +15,14 @@ export class CryptoComponent implements OnInit {
   constructor(private http: HttpClient, private apiService: ApiService) { }
 
   ngOnInit(): void {
-    this.getAllNotebooks();
+    this.test1();
+    this.test2();
   }
 
   onGenerateKeys() {
   }
 
-  public getAllNotebooks() {
+  public test1() {
     const url = 'http://localhost:8080/hash';
     this.http.get(url,
       {responseType: 'text'}).subscribe(
@@ -34,7 +35,22 @@ export class CryptoComponent implements OnInit {
   //    }
     );
   }
+
+public test2() {
+  const url = 'http://localhost:8080/encrypt';
+  this.http.get(url,
+    {responseType: 'json'}).subscribe(
+    res => {
+      console.log(res);
+    },
+   // err => {
+   //   alert("Error");
+   //   console.log(err)
+//    }
+  );
 }
+}
+
 
 
 export interface Notebook {
