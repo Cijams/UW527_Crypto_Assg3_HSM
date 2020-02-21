@@ -19,6 +19,7 @@ import { RegisterComponent } from './register/register.component';
 import { BotBarComponent } from './components/bot-bar/bot-bar.component';
 import { CryptoComponent } from './crypto/crypto.component';
 import { HttpClientModule } from '@angular/common/http';
+import { MatInputModule } from '@angular/material/input';
 
 
 @NgModule({
@@ -44,6 +45,7 @@ import { HttpClientModule } from '@angular/common/http';
     ReactiveFormsModule,
     MatFormFieldModule,
     HttpClientModule,
+    MatInputModule,
     RouterModule.forRoot([
       {
         path: '', component: HsmLoginComponent
