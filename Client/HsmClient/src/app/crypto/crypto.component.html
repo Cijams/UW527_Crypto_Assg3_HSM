@@ -6,48 +6,45 @@
         <h1>Cryptography Operations</h1>
         <div style="margin-left: 10px;">
             <div class="form-group">
+
                 <!-- Buttons -->
                 <span>
                     <div>
-                        <button id="loginBtn" style="color:white !important; width: 125px;" mat-raised-button
+                        <button id="btn" style="color:white !important; width: 125px;" mat-raised-button
                             (click)="test1()">Generate Keys</button>
                     </div>
-                    <br>
-                    <div>
-                        <button id="loginBtn" style="color:white !important; width: 125px;" mat-raised-button
+
+                    <div style="padding-bottom: 15px;">
+                        <button id="btn" style="color:white !important; width: 125px;" mat-raised-button
                             (click)="test2()">Display Keys</button>
                     </div>
 
-
-                    <br>
-                    <br>
                     <div style="float: left;">
                         <div>
-                            <button id="loginBtn" style="color:white !important; width: 100px; margin-top: 20px;"
+                            <button id="btn" style="color:white !important; width: 100px; margin-top: 20px;"
                                 mat-raised-button>Encrypt</button>
                         </div>
-                        <br>
+
                         <div>
-                            <button id="loginBtn" style="color:white !important; width: 100px;"
+                            <button id="btn" style="color:white !important; width: 100px;"
                                 mat-raised-button>Decrypt</button>
                         </div>
-                        <br>
+
                         <div>
-                            <button id="loginBtn" style="color:white !important; width: 100px;"
+                            <button id="btn" style="color:white !important; width: 100px;"
                                 mat-raised-button>Hash</button>
                         </div>
-                        <br>
+
                         <div>
                             <button id="loginBtn" style="color:white !important; width: 100px;"
                                 mat-raised-button>Sign</button>
                         </div>
                     </div>
-
-                    <br>
                     <form>
-                        <!-- <mat-form-field> -->
+                        <!-- add form controller -->
+                        <mat-form-field>
                         <textarea class="encryptField" matInput placeholder="Text to encrypt..."></textarea>
-                        <!-- </mat-form-field> -->
+                        </mat-form-field>
                     </form>
                 </span>
             </div>
