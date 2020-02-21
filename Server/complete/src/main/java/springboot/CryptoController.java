@@ -1,8 +1,14 @@
 package springboot;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -52,9 +58,40 @@ public class CryptoController {
 
 	@CrossOrigin
 	@GetMapping("/hash")
-	public ResponseEntity<String> hash() {
-		return new ResponseEntity<String>("Response from the hash method", HttpStatus.OK);
+	public ResponseEntity<String> hash() throws NoSuchAlgorithmException {
+		byte[] sha2 = new byte[0];
+		StringBuilder hexString = null;
+		sha2 = generateSha2(Math.random()+"");
+		// Convert SHA-2 to hexadecimal
+		hexString = _generateHex(sha2);
+		return new ResponseEntity<String>(hexString.toString(), HttpStatus.OK);
 	}
+
+   /**
+   * Generate the SHA-256 value.
+   * 
+   * @param input A string representing the seed value
+   * @return A byte array represending the hash in UTF-8 format.
+   * @throws NoSuchAlgorithmException
+   */
+  public static byte[] generateSha2(String input) throws NoSuchAlgorithmException {
+    MessageDigest md = MessageDigest.getInstance("SHA-256");
+    return md.digest(input.getBytes(StandardCharsets.UTF_8));
+  }
+
+   /**
+   * Returns the hexidecimal format of the incoming byte array.
+   * 
+   * @param bytes A byte array representation of a SHA-256 hash.
+   * @return The hexidecimal representation of a SHA-256 hash.
+   */
+  private static StringBuilder _generateHex(byte[] bytes) {
+    StringBuilder hexString = new StringBuilder();
+    for (byte b : bytes) {
+      hexString.append(String.format("%02X", b));
+    }
+    return hexString;
+  }
 
 	// @CrossOrigin
 	// @ResponseBody

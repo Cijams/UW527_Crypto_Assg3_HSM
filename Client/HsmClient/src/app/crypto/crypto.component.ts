@@ -11,6 +11,8 @@ const localUrl = 'assets/data/smartphone.json';
 })
 export class CryptoComponent implements OnInit {
   notebooks: Notebook[] = [];
+  
+  hash;
 
   constructor(private http: HttpClient, private apiService: ApiService) { }
 
@@ -27,6 +29,7 @@ export class CryptoComponent implements OnInit {
     this.http.get(url,
       {responseType: 'text'}).subscribe(
       res => {
+        this.hash = res;
         console.log(res);
       },
      // err => {
