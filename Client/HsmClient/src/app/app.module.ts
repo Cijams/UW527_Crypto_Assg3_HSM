@@ -9,7 +9,7 @@ import { TopBarComponent } from './components/top-bar/top-bar.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule} from '@angular/material/icon';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {MatCardModule} from '@angular/material/card'
+import {MatCardModule} from '@angular/material/card';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -18,6 +18,8 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { BotBarComponent } from './components/bot-bar/bot-bar.component';
 import { CryptoComponent } from './crypto/crypto.component';
+import { HttpClientModule } from '@angular/common/http';
+import { MatInputModule } from '@angular/material/input';
 
 
 @NgModule({
@@ -36,13 +38,14 @@ import { CryptoComponent } from './crypto/crypto.component';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    BrowserModule,
     BrowserAnimationsModule,
     MatCardModule,
     MatDialogModule,
     MatButtonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
+    HttpClientModule,
+    MatInputModule,
     RouterModule.forRoot([
       {
         path: '', component: HsmLoginComponent
