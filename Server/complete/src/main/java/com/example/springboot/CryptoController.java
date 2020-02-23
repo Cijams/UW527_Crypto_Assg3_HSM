@@ -56,7 +56,7 @@ public class CryptoController {
 
   @RequestMapping("/register")
   public String register() {
-    return "Register Called";
+    return "Register Called - DEPRECATED, USE registerUser( String, String )";
   }
 
   @RequestMapping("/genKeys")
@@ -77,6 +77,39 @@ public class CryptoController {
   @RequestMapping("/sign")
   public String sign() {
     return "Sign Called";
+  }
+
+  @RequestMapping("/registerUser")
+  public static boolean registerUser( String name, String pass ) {
+    if( DEBUG ) {
+      System.out.println( "Received arguments: " );
+      System.out.println( "  NAME: " + name );
+      System.out.println( "  PASS: " + pass );
+    }
+    
+    String hash = passwordHash( pass );
+    
+    if( DEBUG ) {
+      System.out.println( "Arguments sending to database:" );
+      System.out.println( "  NAME: " + name );
+      System.out.println( "  HASH: " + hash );
+    }
+    
+    if( databaseRead( name, hash ) ) {
+      if( DEBUG ) {
+        System.out.println( "Entry found in database. Aborting registration..." );
+      }
+      return false;
+    }
+    else {
+      if( DEBUG ) {
+        System.out.println( "Entry not found in database. Attempting to write..." );  
+      }
+    }
+    
+    // Attempt to enter name and hash to database
+    boolean writeResult = databaseWrite( name, hash );
+    return writeResult;
   }
 
   @RequestMapping("/HSMEncrypt")
