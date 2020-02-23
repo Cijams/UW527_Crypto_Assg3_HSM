@@ -41,7 +41,7 @@ public class CryptoController {
 
   @RequestMapping("/hash")
   public String hash() {
-    return "Hash Called";
+    return "Hash Called - DEPRECATED, USE SHA256() or passwordHash()";
   }
 
   @RequestMapping("/encrypt")
@@ -51,7 +51,7 @@ public class CryptoController {
 
   @RequestMapping("/login")
   public String login() {
-    return "Login Called";
+    return "Login Called - DEPRECATED, USE loginUser( String, String )";
   }
 
   @RequestMapping("/register")
@@ -66,19 +66,108 @@ public class CryptoController {
 
   @RequestMapping("/getKeys")
   public String getKeys() {
-    return "GetKeys Called";
+    return "GetKeys Called - DEPRECATED, USE keyLookup( String, String )";
   }
 
   @RequestMapping("/decrypt")
   public String decrypt() {
-    return "Decrypt Called";
+    return "Decrypt Called - DEPRECATED, USE <?>";
   }
 
   @RequestMapping("/sign")
   public String sign() {
-    return "Sign Called";
+    return "Sign Called - DEPRECATED, USE <?>";
   }
 
+  @RequestMapping("/XOR")
+  public static String XOR( String key, String target ) {
+    String result = "<TODO: XOR the key and target together>";
+    return result;
+  }
+  
+  @RequestMapping("/SHA256")
+  public static String SHA256( String input ) {
+    String hash = "<TODO: HASH_THE_INPUT>";
+    return hash;
+  }
+  
+  @RequestMapping("/RSAPrivate")
+  public static String RSAPrivate( String keyPass ) {
+    String retString = "<TODO: RSA_PRIVATE_KEY>";
+    return retString;
+  }
+​
+  @RequestMapping("/RSAPublic")
+  public static String RSAPublic( String keyPass ) {
+    String retString = "<TODO: RSA_PUBLIC_KEY>";
+    return retString;
+  }
+  
+  @RequestMapping("/HSMIdentify")
+  public static String HSMIdentify( String keyPass ) {
+    String retString = "<TODO: HSM_KEY_IDENTIFIER>";
+    return retString;
+  }
+​
+  @RequestMapping("/AES256encrypt")
+  public static String AES256encrypt( String plaintext ) {
+    String ciphertext = "<TODO: Encrypt the plaintext>";
+    return ciphertext;
+  }
+  
+  @RequestMapping("/passwordHash")  
+  public static String passwordHash( String pass ) {
+    String retString = "FOOBARBAZ";
+    // TODO: Hash the password into a string
+    return retString;
+  }
+  
+  @RequestMapping("/databaseWrite")
+  public static boolean databaseWrite( String name, String hash ) {
+    boolean result = true; // TODO: Database call
+    return result;
+  }
+
+  @RequestMapping("/databaseRead")  
+  public static boolean databaseRead( String name, String hash ) {
+    boolean result = true; // TODO: Database call
+    return result;
+  }
+  
+  // Looks up a name:keyID pair
+  // True  - If pair is found
+  // False - If pair is not found
+  @RequestMapping("/HSMDatabaseRead")
+  public static boolean HSMDatabaseRead( String name, String keyID ) {
+    boolean result = false; // TODO: Database call
+    return result;
+  }
+  
+  @RequestMapping("/loginUser")
+  public static boolean loginUser( String name, String pass ) {
+    String hash = passwordHash( pass );
+    // Attempt to find combination in Database
+    if( databaseRead( name, hash ) ) {
+      if( DEBUG ) {
+        System.out.println( "User found! Logging in..." );
+      }
+      return true;
+    }
+    else {
+      if( DEBUG ) {
+        System.out.println( "User/password not found. Access denied." );
+      }
+      return false;
+    }
+  }
+
+  @RequestMapping("/keyLookup")
+  public static boolean keyLookup( String name, String keyID ) {
+    // TODO: Database call
+    boolean result = false; // False if not found
+    return result;
+  }
+  
   @RequestMapping("/registerUser")
   public static boolean registerUser( String name, String pass ) {
     if( DEBUG ) {
