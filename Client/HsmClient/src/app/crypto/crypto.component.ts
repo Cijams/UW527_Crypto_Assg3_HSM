@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiService } from '../api.service';
 import { MatInputModule } from '@angular/material/input';
 
@@ -19,11 +19,11 @@ export class CryptoComponent implements OnInit {
 
   /**
    * Generate a pair of private and public keys using RSA.
-   * 
+   *
    * A key pair is generated using RSA, a key id is used to link this key to the user id.
    * Private key is stored AES256 encrypted in the HSM DB. Key encryption key is
    * calculated as follows: KEK = HSM Secret Key XOR SHA256(Key Password).
-   * 
+   *
    * @argument Key Password.
    * @returns Key ID, Public Key.
    */
@@ -53,11 +53,11 @@ export class CryptoComponent implements OnInit {
   }
 
   /**
-  *Locates the private key corresponding to the provided Key ID. Returns the
-  * encryption of the provided text.
-  * @argument Text, Key ID, Key Password
-  * @returns RSA(Text, Private Key from HSM DB)
-  */
+   * Locates the private key corresponding to the provided Key ID. Returns the
+   * encryption of the provided text.
+   * @argument Text, Key ID, Key Password
+   * @returns RSA(Text, Private Key from HSM DB)
+   */
   public onEncrypt() {
     const url = 'http://localhost:8080/encrypt';
     this.http.get(url,
@@ -68,6 +68,7 @@ export class CryptoComponent implements OnInit {
         },
       );
   }
+
 
   /**
    * Decrypts given textfield with inverse of previously used encryption.
@@ -85,7 +86,7 @@ export class CryptoComponent implements OnInit {
 
   /**
    * Performs SHA-256 hashing on a given text.
-   * @argument String
+   * @argument String that does X
    * @returns String
    */
   public onHash() {
@@ -124,6 +125,24 @@ export class CryptoComponent implements OnInit {
         res => {
           this.text = res;
           console.log(res);
+        },
+      );
+  }
+
+  /**
+   *  Basic architecture of sending and receiving data.
+   */
+  public onTest() {
+    const data = 'This is from angular';
+    const url = 'http://localhost:8080/test';
+    this.http.get<string>(url,
+      {
+        params: new HttpParams().set('id', data)
+      },
+      ).subscribe(
+        res => {
+          const returnValues = Object.values(res);
+          console.log(returnValues[1]);
         },
       );
   }

@@ -11,9 +11,3 @@ export class ApiService {
   constructor(private http: HttpClient) { }
 
 }
-
-export interface Notebook {
-  id: string;
-  name: string;
-  nbOfBotes: number;
-}

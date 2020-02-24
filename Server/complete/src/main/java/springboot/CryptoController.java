@@ -14,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -63,6 +65,7 @@ public class CryptoController {
 		return "Server Up";
 	}
 
+
 	/**
 	 * Generates a SHA-256 value.
 	 */
@@ -102,12 +105,6 @@ public class CryptoController {
 		}
 		return hexString;
 	}
-
-	// @CrossOrigin
-	// @ResponseBody
-	// @PostMapping("/login")
-	// public String login() {
-	// }
 
 	/**
 	 * Registers a user with a password to the HSM database.
@@ -185,6 +182,28 @@ public class CryptoController {
 	@GetMapping("/genReport")
 	public ResponseEntity<String> genReport() {
 		return new ResponseEntity<String>("Response from the genReport method", HttpStatus.OK);
+	}
+
+
+	/**
+  	 *  Basic architecture of sending and receiving data.
+  	 */
+	@CrossOrigin
+	@GetMapping("/test")
+	@ResponseBody
+	public Map<String, String> getFoos(@RequestParam String id) {
+		System.out.println(id);
+
+		HashMap<String, String> data = new HashMap<>();
+
+		// DO SOME COOL CRYPTO
+		int test = 500;
+		test = test % 9 * 4;
+
+		// RETURN IT
+		data.put("key", id + " and this is from spring");
+		data.put("data", test+"");
+		return data;
 	}
 
 }
