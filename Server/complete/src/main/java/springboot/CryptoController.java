@@ -188,7 +188,7 @@ public class CryptoController {
 	}
 
 	/**
-	 * Registers a new user in the HSM DB. User password is stored hashed in the DB.
+	 * Logs in a user.
 	 * 
 	 * @param userID	The name identification field associated with a user.
 	 * @param password	The chosen password of the user.
@@ -196,6 +196,30 @@ public class CryptoController {
 	 */
 	@CrossOrigin
 	@GetMapping("/loginUser")
+	@ResponseBody
+	public static Map<String, Boolean> loginUser(@RequestParam String userID, @RequestParam String password) {
+		HashMap<String, Boolean> data = new HashMap<>();
+		System.out.println("User name: " + userID + "\nPassword: " + password);
+
+		System.out.println("SENDING DATA TO DATABASE...");
+		// Send user name and password to database.
+		// If successful
+		data.put(userID, true);
+		// else
+		data.put(userID, false);
+
+		return data;
+	}
+
+	/**
+	 * Registers a new user in the HSM DB. User password is stored hashed in the DB.
+	 * 
+	 * @param userID	The name identification field associated with a user.
+	 * @param password	The chosen password of the user.
+	 * @return A
+	 */
+	@CrossOrigin
+	@GetMapping("/registerUser")
 	@ResponseBody
 	public static Map<String, Boolean> registerUser(@RequestParam String userID, @RequestParam String password) {
 		HashMap<String, Boolean> data = new HashMap<>();

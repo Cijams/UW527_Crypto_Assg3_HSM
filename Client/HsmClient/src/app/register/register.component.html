@@ -5,18 +5,18 @@
     <div id="loginBox">
         <h1>Register</h1>
         <div style="margin-left: 10px;">
-            <div class="form-group">
+            <div class="form-group" [formGroup]="registerForm">
                 <div>
                     <label id="letters" for="username">User Name</label>
                 </div>
                 <div>
-                    <input type="text">
+                    <input type="text" formControlName="userID">
                 </div>
                 <div>
                     <label id="letters" for="password">Password</label>
                 </div>
                 <div>
-                    <input type="text">
+                    <input type="text" formControlName="password">
                 </div>
 
                 <button id="createBtn" (click)="onRegisterUser()" style="color:white !important" mat-raised-button>Register

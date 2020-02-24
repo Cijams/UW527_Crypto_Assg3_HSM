@@ -12,45 +12,34 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 })
 export class HsmLoginComponent implements OnInit {
   loginForm: FormGroup;
-  loading = false;
-  submitted = false;
-  returnUrl: string;
 
   constructor(
     private formBuilder: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private http: HttpClient,
-
+    private http: HttpClient
   ) { }
 
   ngOnInit() {
-   this.loginForm = this.formBuilder.group({
-     userID: [''],
-     password: ['']
-   });
-  }
-
-  onClickMe() {
-    console.log(this.loginForm.get('userID').value);
-    console.log(this.loginForm.get('password').value);
+    this.loginForm = this.formBuilder.group({
+      userID: [''],
+      password: ['']
+    });
   }
 
   public onLoginUser() {
-    const data = 'This is from angular';
     const url = 'http://localhost:8080/loginUser';
     this.http.get<string>(url,
       {
-        params: new HttpParams().set('userID', this.loginForm.get('userID').value).append('password', this.loginForm.get('password').value)
+        params: new HttpParams().set('userID', this.loginForm.get('userID').value)
+          .append('password', this.loginForm.get('password').value)
       },
-      ).subscribe(
-        res => {
-          const returnKeys = Object.keys(res);
-          const returnValues = Object.values(res);
-          console.log(returnKeys);
-          console.log(returnValues);
-        },
-      );
+    ).subscribe(
+      res => {
+        const returnKeys = Object.keys(res);
+        const returnValues = Object.values(res);
+        console.log(returnKeys);
+        console.log(returnValues);
+      },
+    );
   }
 
 }
