@@ -129,6 +129,22 @@ export class CryptoComponent implements OnInit {
       );
   }
 
+  public onRegisterUser() {
+    const data = 'This is from angular';
+    const url = 'http://localhost:8080/registerUser';
+    this.http.get<string>(url,
+      {
+        params: new HttpParams().set('id', data)
+      },
+      ).subscribe(
+        res => {
+          const returnValues = Object.values(res);
+          console.log(returnValues);
+          this.text = returnValues[1];
+        },
+      );
+  }
+
   /**
    *  Basic architecture of sending and receiving data.
    */
@@ -143,6 +159,7 @@ export class CryptoComponent implements OnInit {
         res => {
           const returnValues = Object.values(res);
           console.log(returnValues[1]);
+          this.text = returnValues[1];
         },
       );
   }

@@ -1,7 +1,15 @@
 package com.example.springboot;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @RestController
 public class CryptoController {
@@ -11,7 +19,7 @@ public class CryptoController {
 
   public static void main(String[] args) {
 
-    boolean result = registerUser("MyName", "MyPassword");
+    boolean result = registerUser("MyName", "MyPassword") != null;
     System.out.println("Result of registerUser(): " + result);
 
     result = loginUser("MyName", "MyPassword");
@@ -167,27 +175,30 @@ public class CryptoController {
     return result;
   }
 
-  @RequestMapping("/registerUser")
-  public static boolean registerUser(String name, String pass) {
+	@CrossOrigin
+	@GetMapping("/registerUser")
+	@ResponseBody
+	public static HashMap<String, Boolean> registerUser(@RequestParam String userID, @RequestParam String password) {
+    HashMap<String, Boolean> data = new HashMap<>();
     if (DEBUG) {
       System.out.println("Received arguments: ");
-      System.out.println("  NAME: " + name);
-      System.out.println("  PASS: " + pass);
+      System.out.println("  NAME: " + userID);
+      System.out.println("  PASS: " + password);
     }
 
-    String hash = passwordHash(pass);
+    String hash = passwordHash(password);
 
     if (DEBUG) {
       System.out.println("Arguments sending to database:");
-      System.out.println("  NAME: " + name);
+      System.out.println("  NAME: " + userID);
       System.out.println("  HASH: " + hash);
     }
 
-    if (databaseRead(name, hash)) {
+    if (databaseRead(userID, hash)) {
       if (DEBUG) {
         System.out.println("Entry found in database. Aborting registration...");
       }
-      return false;
+      return null;
     } else {
       if (DEBUG) {
         System.out.println("Entry not found in database. Attempting to write...");
@@ -195,8 +206,9 @@ public class CryptoController {
     }
 
     // Attempt to enter name and hash to database
-    boolean writeResult = databaseWrite(name, hash);
-    return writeResult;
+    boolean writeResult = databaseWrite(userID, hash);
+    data.put("Register Successfull", writeResult);
+    return data;
   }
 
   @RequestMapping("/HSMEncrypt")
@@ -223,9 +235,9 @@ public class CryptoController {
       return false;
     }
 
-    String privateKey = RSAPrivate(keyPassword);
-    String publicKey = RSAPublic(keyPassword);
-    String keyID = HSMIdentify(keyPassword);
+    String privateKey = RSAPrivate(keyPassword);  // To be store in mongodb
+    String publicKey = RSAPublic(keyPassword);    // To be store in mongodb, but dispalyed to user?
+    String keyID = HSMIdentify(keyPassword);      
     String SHA256ofPass = SHA256(keyPassword);
 
     // TODO: Where do we send all these pieces...?

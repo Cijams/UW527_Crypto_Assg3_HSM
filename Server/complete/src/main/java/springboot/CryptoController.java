@@ -65,7 +65,6 @@ public class CryptoController {
 		return "Server Up";
 	}
 
-
 	/**
 	 * Generates a SHA-256 value.
 	 */
@@ -176,18 +175,45 @@ public class CryptoController {
 
 	/**
 	 * Generates a report summarizing the status of the HSM. A list of the
-	 * registered users and stored keys.
+	 * registered users and their associated stored keys.
 	 */
 	@CrossOrigin
 	@GetMapping("/genReport")
-	public ResponseEntity<String> genReport() {
-		return new ResponseEntity<String>("Response from the genReport method", HttpStatus.OK);
+	public Map<String, String> genReport() {
+		HashMap<String, String> reportData = new HashMap<>();
+		// For each user, store all keys.
+		return reportData;
+		// return new ResponseEntity<String>("Response from the genReport method",
+		// HttpStatus.OK);
 	}
 
+	/**
+	 * Registers a new user in the HSM DB. User password is stored hashed in the DB.
+	 * 
+	 * @param userID	The name identification field associated with a user.
+	 * @param password	The chosen password of the user.
+	 * @return A
+	 */
+	@CrossOrigin
+	@GetMapping("/registerUser")
+	@ResponseBody
+	public static Map<String, Boolean> registerUser(@RequestParam String userID, @RequestParam String password) {
+		HashMap<String, Boolean> data = new HashMap<>();
+		System.out.println("User name:\n" + userID + "\nPassword: " + password);
+
+		System.out.println("SENDING DATA TO DATABASE...");
+		// Send user name and password to database.
+		// If successful
+		data.put(userID, true);
+		// else
+		data.put(userID, false);
+
+		return data;
+	}
 
 	/**
-  	 *  Basic architecture of sending and receiving data.
-  	 */
+	 * Basic architecture of sending and receiving data.
+	 */
 	@CrossOrigin
 	@GetMapping("/test")
 	@ResponseBody
@@ -202,8 +228,7 @@ public class CryptoController {
 
 		// RETURN IT
 		data.put("key", id + " and this is from spring");
-		data.put("data", test+"");
+		data.put("data", test + "");
 		return data;
 	}
-
 }

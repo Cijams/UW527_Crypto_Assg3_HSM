@@ -7,18 +7,6 @@
         <div style="margin-left: 10px;">
             <div class="form-group">
                 <div>
-                    <label id="letters" for="username">First Name</label>
-                </div>
-                <div>
-                    <input type="text">
-                </div>
-                <div>
-                    <label id="letters" for="username">Last Name</label>
-                </div>
-                <div>
-                    <input type="text">
-                </div>
-                <div>
                     <label id="letters" for="username">User Name</label>
                 </div>
                 <div>
@@ -31,12 +19,12 @@
                     <input type="text">
                 </div>
 
-                <button id="createBtn" (click)="onClickMe()" style="color:white !important" mat-raised-button>Create
+                <button id="createBtn" (click)="onRegisterUser()" style="color:white !important" mat-raised-button>Register
                 </button>
                 <div style="padding-top: 30px;">
                     <h3 style="float: left; padding-right: 10px;">Already have an account?</h3>
                     <a [routerLink]="['/login']">
-                    <button class="loginBtn" (click)="onClickMe()" style="color:#7F0000 !important; background-color: #F0F0F0;" mat-raised-button>Login
+                    <button class="loginBtn" style="color:#7F0000 !important; background-color: #F0F0F0;" mat-raised-button>Login
                     </button>
                     </a>
                 </div>
