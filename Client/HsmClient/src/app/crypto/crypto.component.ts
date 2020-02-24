@@ -27,13 +27,28 @@ export class CryptoComponent implements OnInit {
    * @argument Key Password.
    * @returns Key ID, Public Key.
    */
-  public onGenerateKeys() {
+  public f() {
     const url = 'http://localhost:8080/genKeys';
     this.http.get(url,
       { responseType: 'text' }).subscribe(
         res => {
           this.text = res;
           console.log(res);
+        },
+      );
+  }
+
+  public onGenerateKeys() {
+    const url = 'http://localhost:8080/genKeys';
+    this.http.get<string>(url,
+      {
+   //     params: new HttpParams().set('id', this.apiService)
+      },
+      ).subscribe(
+        res => {
+          const returnValues = Object.values(res);
+          console.log(returnValues);
+          this.text = returnValues[1];
         },
       );
   }

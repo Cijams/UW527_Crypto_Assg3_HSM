@@ -235,6 +235,34 @@ public class CryptoController {
 		return data;
 	}
 
+
+  /**
+   * Generate a pair of private and public keys using RSA.
+   *
+   * A key pair is generated using RSA, a key id is used to link this key to the user id.
+   * Private key is stored AES256 encrypted in the HSM DB. Key encryption key is
+   * calculated as follows: KEK = HSM Secret Key XOR SHA256(Key Password).
+   *
+   * @param Key userID.
+   * @returns Key ID, Public Key.
+   */
+	@CrossOrigin
+	@GetMapping("/onGenerateKeys")
+	@ResponseBody
+	public static Map<String, Boolean> generateKeys(@RequestParam String keyPassword) {
+		HashMap<String, Boolean> data = new HashMap<>();
+		System.out.println("User name:" + keyPassword);
+
+		System.out.println("SENDING DATA TO DATABASE...");
+		// Generate a key
+		// If successful
+		data.put(keyPassword, true);
+		// else
+		data.put(keyPassword, false);
+
+		return data;
+	}
+
 	/**
 	 * Basic architecture of sending and receiving data.
 	 */

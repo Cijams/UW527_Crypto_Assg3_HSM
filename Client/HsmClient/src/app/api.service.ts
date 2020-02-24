@@ -7,7 +7,16 @@ const localUrl = 'http://localhost:8080/hello-world';
   providedIn: 'root'
 })
 export class ApiService {
+  registeredUser;
 
   constructor(private http: HttpClient) { }
+
+  getRegisteredUser() {
+
+  }
+
+  setRegisteredUser() {
+
+  }
 
 }
