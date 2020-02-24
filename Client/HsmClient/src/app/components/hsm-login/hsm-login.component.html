@@ -5,12 +5,12 @@
     <div id="loginBox">
         <h1>Login</h1>
         <div style="margin-left: 10px;">
-            <div class="form-group">
+            <div class="form-group" [formGroup]="loginForm">
                 <div>
                     <label id="letters" for="username">User Name</label>
                 </div>
                 <div>
-                    <input type="text">
+                    <input type="text" formControlName="userID">
                 </div>
 
                 <div>
@@ -18,10 +18,10 @@
                 </div>
 
                 <div>
-                    <input type="text">
+                    <input type="text" formControlName="password">
                 </div>
 
-                <button id="loginBtn" (click)="onClickMe()" style="color:white !important"
+                <button id="loginBtn" (click)="onLoginUser()" style="color:white !important"
                     mat-raised-button>Login</button>
 
                 <a [routerLink]="['/register']">

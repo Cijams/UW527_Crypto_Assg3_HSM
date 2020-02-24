@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { HttpParams, HttpClient } from '@angular/common/http';
 import { ApiService } from '../api.service';
 
@@ -10,33 +10,28 @@ import { ApiService } from '../api.service';
 })
 export class RegisterComponent implements OnInit {
   loginForm: FormGroup;
+  userID;
+  password;
 
-  constructor(private http: HttpClient, private apiService: ApiService) { }
-
-
-
+  constructor(private http: HttpClient, private apiService: ApiService,
+              private formBuilder: FormBuilder) {
+    this.userID = new FormControl('', [Validators.required]);
+    this.loginForm = this.formBuilder.group({
+      userID: this.userID
+    });
+  }
 
   ngOnInit(): void {
   }
 
-  public onRegisterUser() {
-    let userID = 'Josh1800';
-    let password = 'secret';
+  onRegisterUserTest() {
+    console.log(this.userID);
+    console.log(this.password);
+  }
 
-    const data = 'This is from angular';
-    const url = 'http://localhost:8080/registerUser';
-    this.http.get<string>(url,
-      {
-        params: new HttpParams().set('userID', userID).append('password', password)
-      },
-      ).subscribe(
-        res => {
-          const returnKeys = Object.keys(res);
-          const returnValues = Object.values(res);
-          console.log(returnKeys);
-          console.log(returnValues);
-        },
-      );
+  onRegisterUser() {
+    console.log(this.userID);
+    console.log(this.password);
   }
 
 }

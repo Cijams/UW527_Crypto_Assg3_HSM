@@ -195,11 +195,11 @@ public class CryptoController {
 	 * @return A
 	 */
 	@CrossOrigin
-	@GetMapping("/registerUser")
+	@GetMapping("/loginUser")
 	@ResponseBody
 	public static Map<String, Boolean> registerUser(@RequestParam String userID, @RequestParam String password) {
 		HashMap<String, Boolean> data = new HashMap<>();
-		System.out.println("User name:\n" + userID + "\nPassword: " + password);
+		System.out.println("User name:" + userID + "\nPassword: " + password);
 
 		System.out.println("SENDING DATA TO DATABASE...");
 		// Send user name and password to database.
