@@ -1,7 +1,7 @@
 package springboot;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
@@ -16,7 +16,7 @@ public class User {
 	
 	private String passwordHash;
 	
-	private Set<Key> keys = new HashSet<>();
+	private List<Key> keys = new ArrayList<>();
 
 	@Override
 	public boolean equals( final Object obj ) {
@@ -41,7 +41,7 @@ public class User {
 
 	}
 
-	public Set<Key> getKeys() {
+	public List<Key> getKeys() {
 		return keys;
 	}
 
