@@ -55,4 +55,49 @@ public class PersistenceServiceImpl implements PersistenceService {
 		
 	}
 
+	@Override
+	public Key createKey(String userName, String keyId, String keyValue) {
+		
+		Key newKey = new Key();
+		newKey.setKeyId( keyId );
+		newKey.setValue( keyValue );
+		
+		User user = getUserByUsername( userName );
+		if ( user == null ) return null;	// no user by that ID found!
+		
+		user.getKeys().add( newKey );
+		updateUser( user );
+
+		return newKey;
+		
+	}
+
+	@Override
+	public User deleteKey(String userName, String keyId) {
+
+		User user = getUserByUsername( userName );
+		if ( user == null ) return null;	// no user by that ID found!
+		
+		Key keyToRemove = null;
+		
+		for ( Key key : user.getKeys() ) {
+			
+			if ( key.getKeyId().equalsIgnoreCase( keyId ) ) {
+				keyToRemove = key;
+				break;
+			}
+			
+		}
+
+		if ( keyToRemove != null ) {
+			
+			user.getKeys().remove( keyToRemove );
+			return updateUser( user );
+			
+		}
+		
+		return user;
+		
+	}
+
 }

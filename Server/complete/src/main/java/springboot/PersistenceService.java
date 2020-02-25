@@ -50,4 +50,21 @@ public interface PersistenceService {
 	 */
 	public Key setMasterKey( String value );
 	
+	/**
+	 * Create a new Key for a specific User
+	 * @param userName The ID of the User that will own the new Key
+	 * @param keyId The ID of the new Key
+	 * @param keyValue The value of the new Key
+	 * @return The current state of the newly-created Key
+	 */
+	public Key createKey( String userName, String keyId, String keyValue );
+
+	/**
+	 * Delete a Key
+	 * @param userName The ID of the User that "owns" the Key
+	 * @param keyId The ID of the Key to delete
+	 * @return The current state of the User
+	 */
+	public User deleteKey( String userName, String keyId );
+
 }

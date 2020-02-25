@@ -44,7 +44,10 @@ public class PersistenceServiceImplTest {
     	// destroy test users
     	service.deleteUser( testUser1 );
     	service.deleteUser( testUser2 );
-    	
+
+    	// reset master key
+    	service.setMasterKey( "FEEDFACECAFEBEEF" );
+
     }
     
     @Test
@@ -93,5 +96,30 @@ public class PersistenceServiceImplTest {
     	assertThat( masterKey.getValue() ).as( "Master key value should be set properly!" ).isEqualTo( masterKeyValue );
     	
     }
+    
+    @Test
+    public void createDeleteKey() {
+    	
+    	String keyId = "OpenVMS";
+    	String keyValue = "Forever";
+    	
+    	// create the key
+    	Key newKey = service.createKey( testUser2.getUserName(), keyId, keyValue );
+    	
+    	// retrieve the test user again
+    	User user = service.getUserByUsername( testUser2.getUserName() );
+    	
+    	// should exist
+    	assertThat( newKey ).as( "New Key should not be NULL!" ).isNotNull();
+    	assertThat( user.getKeys().contains( newKey ) ).as( "New Key should have been associated with test user" ).isTrue();
+    	
+    	// delete the Key
+    	user = service.deleteKey( testUser2.getUserName(), keyId );
+    	
+    	// should no longer exist
+    	assertThat( user.getKeys().contains( newKey ) ).as( "New Key should no longer be associated with test user" ).isFalse();
+    	
+    }
+    
 	
 }
