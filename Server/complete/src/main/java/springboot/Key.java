@@ -14,6 +14,7 @@ public class Key {
     private String keyId;
 	
 	private String value;
+	private String kvc;
 	
 	@Override
 	public boolean equals( final Object obj ) {
@@ -38,20 +39,28 @@ public class Key {
 
 	}
 
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
-
 	public String getKeyId() {
 		return keyId;
 	}
 
+	public String getKvc() {
+		return kvc;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
 	public void setKeyId(String keyId) {
 		this.keyId = keyId;
+	}
+
+	public void setKvc(String kvc) {
+		this.kvc = kvc;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
 	}
 		
 }
