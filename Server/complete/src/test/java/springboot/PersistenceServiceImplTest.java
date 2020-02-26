@@ -63,6 +63,9 @@ public class PersistenceServiceImplTest {
     	User newUser = service.getUserByUsername( userId );
     	assertThat( newUser ).as( "User must have been created using username and password! ").isNotNull();
     	
+    	// remove cruft
+    	service.deleteUser( newUser );
+    	
     }
     
     @Test
