@@ -1,6 +1,7 @@
 package springboot;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -8,7 +9,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document( collection = "keys" )
 public class Key {
 
+	@Transient
 	public static final String MASTER_KEY_ID = "master_key";
+
+	@Transient
+    public static final String SEQUENCE_NAME = "keys_sequence";
 	
 	@Id
     private String keyId;

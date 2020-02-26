@@ -139,5 +139,21 @@ public class PersistenceServiceImplTest {
     	
     }
     
-	
+	@Test
+	public void getCount() {
+
+		// get the current value of a counter
+		long countValue = service.getCount( User.SEQUENCE_NAME ); 
+		
+		// next call should be incremented
+		long nextCountValue = service.getCount( User.SEQUENCE_NAME );
+
+		// remove cruft from this test
+		service.deleteSequencer( User.SEQUENCE_NAME );
+
+		assertThat( countValue ).as( "Sequencer should start at zero!" ).isZero();
+		assertThat( nextCountValue ).as( "Sequencer should auto-increment!" ).isOne();
+		
+	}
+    
 }

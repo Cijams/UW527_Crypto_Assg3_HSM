@@ -74,5 +74,19 @@ public interface PersistenceService {
 	 * @return The current state of the User
 	 */
 	public User deleteKey( String userName, String keyId );
+	
+	/**
+	 * Get and increment the current value of a named persistent counter ("sequence"). If the Sequencer does not
+	 * yet exist, it will be automatically created.
+	 * @param seqName The name of the sequencer to get 
+	 * @return The current value (will be unique for this sequence, and auto-incremented after retrieval)
+	 */
+	public long getCount( String seqName );
+	
+	/**
+	 * Delete a Sequencer from the database
+	 * @param seqName The name of the Sequence
+	 */
+	public void deleteSequencer( String seqName );
 
 }

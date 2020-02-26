@@ -11,8 +11,11 @@ public class PersistenceServiceImpl implements PersistenceService {
 	private KeyDao keyDao;
 
 	@Autowired
+	private SequenceDao sequenceDao;
+	
+	@Autowired
 	private UserDao userDao;
-
+	
 	@Override
 	public User createUser( User newUser ) {
 		return userDao.save( newUser );
@@ -113,4 +116,46 @@ public class PersistenceServiceImpl implements PersistenceService {
 		
 	}
 
+	@Override
+	public long getCount( String seqName ) {
+	    
+		// get sequence
+		Sequence sequence = sequenceDao.findById( seqName ).orElse( null );
+		
+		// exists?
+		if ( sequence == null ) {
+			
+			sequence = new Sequence();
+			sequence.setId( seqName );
+			sequenceDao.save( sequence );
+			
+		}
+		
+		// get the current sequencer value
+		long sequenceValue = sequence.getCount();
+		
+		// increment it's counter
+		sequence.setCount( sequence.getCount() + 1 );
+		sequenceDao.save( sequence );
+		
+		// return the current value
+		return sequenceValue;
+	
+	}
+
+	@Override
+	public void deleteSequencer(String seqName) {
+		
+		// get sequence
+		Sequence sequence = sequenceDao.findById( seqName ).orElse( null );
+
+		// exists? delete it if it does
+		if ( sequence != null ) {
+		
+			sequenceDao.delete( sequence );
+			
+		}
+		
+	}
+	
 }
