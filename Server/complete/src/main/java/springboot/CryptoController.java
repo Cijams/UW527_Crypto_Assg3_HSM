@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RestController
 public class CryptoController {
 
+	@Autowired
+	private PersistenceService service;
 	// **************************** EXAMPLE **************************************
 
 	// FOLLOW THIS FORMAT AND YOU CAN DO ANYTHING. WILL DO A POST REQUEST EXAMPLE
@@ -70,13 +73,21 @@ public class CryptoController {
 	 */
 	@CrossOrigin
 	@GetMapping("/hash")
-	public ResponseEntity<String> hash() throws NoSuchAlgorithmException {
+	public ResponseEntity<String> hashWeb() throws NoSuchAlgorithmException {
 		byte[] sha2 = new byte[0];
 		StringBuilder hexString = null;
 		sha2 = generateSha2(Math.random() + ""); // Accep user input
 		// Convert SHA-2 to hexadecimal
 		hexString = _generateHex(sha2);
 		return new ResponseEntity<String>(hexString.toString(), HttpStatus.OK);
+	}
+
+	public String hash(String input) throws NoSuchAlgorithmException {
+		byte[] sha2 = new byte[0];
+		StringBuilder hexString = null;
+		sha2 = generateSha2(input);
+		hexString = _generateHex(sha2);
+		return hexString.toString();
 	}
 
 	/**
@@ -105,17 +116,20 @@ public class CryptoController {
 		return hexString;
 	}
 
-	/**
-	 * Registers a user with a password to the HSM database.
-	 * 
-	 * @param User ID, User Password
-	 * @return boolean of the acceptance status of a register request.
-	 */
-	@CrossOrigin
-	@GetMapping("/register")
-	public ResponseEntity<String> register() {
-		return new ResponseEntity<String>("Response from the register method", HttpStatus.OK);
-	}
+	// /**
+	//  * Registers a user with a password to the HSM database.
+	//  * 
+	//  * @param User ID, User Password
+	//  * @return boolean of the acceptance status of a register request.
+	//  */
+	// @CrossOrigin
+	// @GetMapping("/register")
+	// public ResponseEntity<String> register() {
+	// 	// User user = new  User();
+	// 	// user.setUserName("Henry");
+	// 	// user.setPasswordHash(passwordHash);
+	// 	return new ResponseEntity<String>("Response from the register method", HttpStatus.OK);
+	// }
 
 	/**
 	 * Login request for the user. Hash of the user password is compared to the one
@@ -214,24 +228,32 @@ public class CryptoController {
 	/**
 	 * Registers a new user in the HSM DB. User password is stored hashed in the DB.
 	 * 
-	 * @param userID	The name identification field associated with a user.
-	 * @param password	The chosen password of the user.
+	 * @param userID   The name identification field associated with a user.
+	 * @param password The chosen password of the user.
 	 * @return A
+	 * @throws NoSuchAlgorithmException
 	 */
 	@CrossOrigin
 	@GetMapping("/registerUser")
 	@ResponseBody
-	public static Map<String, Boolean> registerUser(@RequestParam String userID, @RequestParam String password) {
-		HashMap<String, Boolean> data = new HashMap<>();
+	public Map<String, String> registerUser(@RequestParam String userID, @RequestParam String password)
+			throws NoSuchAlgorithmException {
+		HashMap<String, String> data = new HashMap<>();
 		System.out.println("User name:" + userID + "\nPassword: " + password);
+		String hash = this.hash(password);
 
 		System.out.println("SENDING DATA TO DATABASE...");
-		// Send user name and password to database.
-		// If successful
-		data.put(userID, true);
-		// else
-		data.put(userID, false);
+		User user = new User();
+		user.setUserName(userID);
+		user.setPasswordHash(hash);
 
+		service.createUser(user.getUserName(), user.getPasswordHash());
+		try {
+			System.out.println(service.getUserByUsername(user.getUserName()));
+		} catch (Exception e) {
+			System.err.println("null");
+		}
+		data.put(userID, hash);
 		return data;
 	}
 
