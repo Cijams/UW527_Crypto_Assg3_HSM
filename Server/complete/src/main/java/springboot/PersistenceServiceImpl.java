@@ -100,4 +100,17 @@ public class PersistenceServiceImpl implements PersistenceService {
 		
 	}
 
+	@Override
+	public User createUser( String userName, String passwordHash ) {
+		
+		// create a new User object given the supplied params
+		User newUser = new User();
+		newUser.setUserName( userName );
+		newUser.setPasswordHash( passwordHash );
+		
+		// persist
+		return createUser( newUser );
+		
+	}
+
 }

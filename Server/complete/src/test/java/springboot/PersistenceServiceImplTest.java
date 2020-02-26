@@ -51,6 +51,21 @@ public class PersistenceServiceImplTest {
     }
     
     @Test
+    public void createUser() {
+    	
+    	String userId = "Pontiac";
+    	String passwordHash = "WS6";
+    	
+    	// create the user
+    	service.createUser( userId, passwordHash );
+    	
+    	// see if the user exists in the database
+    	User newUser = service.getUserByUsername( userId );
+    	assertThat( newUser ).as( "User must have been created using username and password! ").isNotNull();
+    	
+    }
+    
+    @Test
     public void findAllUsers() {
         
         List< User > userList = service.findAllUsers();

@@ -12,6 +12,14 @@ public interface PersistenceService {
 	public User createUser( User newUser );
 	
 	/**
+	 * Create a new user and store to the database
+	 * @param userName The username of this new User
+	 * @param passwordHash The hash of the new user's password
+	 * @return The current state of the new User as persisted to the database
+	 */
+	public User createUser( String userName, String passwordHash );
+	
+	/**
 	 * Get all Users stored in the database
 	 * @return All Users
 	 */
