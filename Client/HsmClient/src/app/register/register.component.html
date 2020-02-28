@@ -16,17 +16,22 @@
                     <label id="letters" for="password">Password</label>
                 </div>
                 <div>
-                    <input type="text" formControlName="password">
+                    <input type="password" formControlName="password">
                 </div>
 
+                <a routerLink="/{{authStatus}}">
                 <button id="createBtn" (click)="onRegisterUser()" style="color:white !important" mat-raised-button>Register
                 </button>
+                </a>
                 <div style="padding-top: 30px;">
                     <h3 style="float: left; padding-right: 10px;">Already have an account?</h3>
                     <a [routerLink]="['/login']">
                     <button class="loginBtn" style="color:#7F0000 !important; background-color: #F0F0F0;" mat-raised-button>Login
                     </button>
                     </a>
+                </div>
+                <div style="padding-top: 30px;" [hidden]="isHidden">
+                    <h3 style="float: left; padding-right: 10px; color: red;">A user by that name already exists.</h3>
                 </div>
             </div>
         </div>

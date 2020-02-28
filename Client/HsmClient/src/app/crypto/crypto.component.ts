@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiService } from '../api.service';
 import { MatInputModule } from '@angular/material/input';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-crypto',
@@ -12,7 +13,8 @@ export class CryptoComponent implements OnInit {
 
   text; // Testing text for ensuring calls work
 
-  constructor(private http: HttpClient, private apiService: ApiService) { }
+  constructor(private http: HttpClient, private apiService: ApiService,
+    private router: Router) { }
 
   ngOnInit(): void {
   }
@@ -156,6 +158,7 @@ export class CryptoComponent implements OnInit {
           const returnValues = Object.values(res);
           console.log(returnValues);
           this.text = returnValues[1];
+          
         },
       );
   }

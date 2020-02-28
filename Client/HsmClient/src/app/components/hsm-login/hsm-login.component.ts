@@ -12,11 +12,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 })
 export class HsmLoginComponent implements OnInit {
   loginForm: FormGroup;
-
+  location: Location
   constructor(
     private formBuilder: FormBuilder,
     private http: HttpClient
-  ) { }
+  ) { 
+    this.location = location;
+  }
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
@@ -27,17 +29,21 @@ export class HsmLoginComponent implements OnInit {
 
   public onLoginUser() {
     const url = 'http://localhost:8080/loginUser';
-    this.http.get<string>(url,
+    this.http.get(url,
       {
         params: new HttpParams().set('userID', this.loginForm.get('userID').value)
           .append('password', this.loginForm.get('password').value)
       },
     ).subscribe(
-      res => {
-        const returnKeys = Object.keys(res);
-        const returnValues = Object.values(res);
-        console.log(returnKeys);
-        console.log(returnValues);
+      (res: Response) => {
+        if (Object.values(res)[0]+"" === "200") {
+          console.log("auth");
+          this.location.assign("crypto"); // TODO dont reload page, use spa.
+         }
+         else {
+           //this.location.assign("unauthorized");
+           console.log("Unauthorized");
+         }
       },
     );
   }

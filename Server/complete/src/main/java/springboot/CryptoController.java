@@ -2,6 +2,9 @@ package springboot;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.HttpCookie;
+import java.net.http.HttpHeaders;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -117,18 +120,19 @@ public class CryptoController {
 	}
 
 	// /**
-	//  * Registers a user with a password to the HSM database.
-	//  * 
-	//  * @param User ID, User Password
-	//  * @return boolean of the acceptance status of a register request.
-	//  */
+	// * Registers a user with a password to the HSM database.
+	// *
+	// * @param User ID, User Password
+	// * @return boolean of the acceptance status of a register request.
+	// */
 	// @CrossOrigin
 	// @GetMapping("/register")
 	// public ResponseEntity<String> register() {
-	// 	// User user = new  User();
-	// 	// user.setUserName("Henry");
-	// 	// user.setPasswordHash(passwordHash);
-	// 	return new ResponseEntity<String>("Response from the register method", HttpStatus.OK);
+	// // User user = new User();
+	// // user.setUserName("Henry");
+	// // user.setPasswordHash(passwordHash);
+	// return new ResponseEntity<String>("Response from the register method",
+	// HttpStatus.OK);
 	// }
 
 	/**
@@ -202,30 +206,6 @@ public class CryptoController {
 	}
 
 	/**
-	 * Logs in a user.
-	 * 
-	 * @param userID	The name identification field associated with a user.
-	 * @param password	The chosen password of the user.
-	 * @return A
-	 */
-	@CrossOrigin
-	@GetMapping("/loginUser")
-	@ResponseBody
-	public static Map<String, Boolean> loginUser(@RequestParam String userID, @RequestParam String password) {
-		HashMap<String, Boolean> data = new HashMap<>();
-		System.out.println("User name: " + userID + "\nPassword: " + password);
-
-		System.out.println("SENDING DATA TO DATABASE...");
-		// Send user name and password to database.
-		// If successful
-		data.put(userID, true);
-		// else
-		data.put(userID, false);
-
-		return data;
-	}
-
-	/**
 	 * Registers a new user in the HSM DB. User password is stored hashed in the DB.
 	 * 
 	 * @param userID   The name identification field associated with a user.
@@ -236,45 +216,56 @@ public class CryptoController {
 	@CrossOrigin
 	@GetMapping("/registerUser")
 	@ResponseBody
-	public Map<String, String> registerUser(@RequestParam String userID, @RequestParam String password)
+	public Map<String, Boolean> registerUser(@RequestParam String userID, @RequestParam String password)
 			throws NoSuchAlgorithmException {
-		HashMap<String, String> data = new HashMap<>();
+		HashMap<String, Boolean> data = new HashMap<>();
+		if (service.getUserByUsername(userID) != null) {
+			data.put(userID, false);
+			return data;
+		}
 		System.out.println("User name:" + userID + "\nPassword: " + password);
-		String hash = this.hash(password);
-
-		System.out.println("SENDING DATA TO DATABASE...");
 		User user = new User();
 		user.setUserName(userID);
+		String hash = this.hash(password);
 		user.setPasswordHash(hash);
-
 		service.createUser(user.getUserName(), user.getPasswordHash());
-		try {
-			System.out.println(service.getUserByUsername(user.getUserName()));
-		} catch (Exception e) {
-			System.err.println("null");
-		}
-		data.put(userID, hash);
+		data.put(userID, true);
 		return data;
 	}
 
+	@CrossOrigin
+	@GetMapping("/loginUser") // TODO refactor to hash on clientside before passing over web
+	@ResponseBody
+	public Map<String, String> loginUser(@RequestParam String userID, @RequestParam String password)
+			throws NoSuchAlgorithmException {
+		HashMap<String, String> data = new HashMap<>();
 
-  /**
-   * Generate a pair of private and public keys using RSA.
-   *
-   * A key pair is generated using RSA, a key id is used to link this key to the user id.
-   * Private key is stored AES256 encrypted in the HSM DB. Key encryption key is
-   * calculated as follows: KEK = HSM Secret Key XOR SHA256(Key Password).
-   *
-   * @param Key userID.
-   * @returns Key ID, Public Key.
-   */
+		if (service.getUserByUsername(userID) == null || service.getUserByUsername(userID).getPasswordHash() == null) {
+			data.put("Response", 401 + "");
+		} else if (false) {
+			// check password against hashed password
+		} else {
+			data.put("Response", 200 + "");
+		}
+		return data;
+	}
+
+	/**
+	 * Generate a pair of private and public keys using RSA.
+	 *
+	 * A key pair is generated using RSA, a key id is used to link this key to the
+	 * user id. Private key is stored AES256 encrypted in the HSM DB. Key encryption
+	 * key is calculated as follows: KEK = HSM Secret Key XOR SHA256(Key Password).
+	 *
+	 * @param Key userID.
+	 * @returns Key ID, Public Key.
+	 */
 	@CrossOrigin
 	@GetMapping("/onGenerateKeys")
 	@ResponseBody
 	public static Map<String, Boolean> generateKeys(@RequestParam String keyPassword) {
 		HashMap<String, Boolean> data = new HashMap<>();
 		System.out.println("User name:" + keyPassword);
-
 		System.out.println("SENDING DATA TO DATABASE...");
 		// Generate a key
 		// If successful
