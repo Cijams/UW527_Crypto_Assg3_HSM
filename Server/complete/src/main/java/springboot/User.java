@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @TypeAlias( "user" )
 @Document( collection = "users" )
 public class User {
+
+    @Transient
+    public static final String SEQUENCE_NAME = "users_sequence";
 
 	@Id
 	private String userName;
