@@ -3,6 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiService } from '../api.service';
 import { MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
+import { FormGroup } from '@angular/forms';
+import { FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-crypto',
@@ -10,13 +12,17 @@ import { Router } from '@angular/router';
   styleUrls: ['./crypto.component.css']
 })
 export class CryptoComponent implements OnInit {
+  keyForm: FormGroup;
+  text; // Testing text for ensuring calls work REMOVE ME
+  publicKey = 'Key goes here';
 
-  text; // Testing text for ensuring calls work
-
-  constructor(private http: HttpClient, private apiService: ApiService,
-    private router: Router) { }
+  constructor(private http: HttpClient,
+              private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
+    this.keyForm = this.formBuilder.group({
+      keyPassword: [''],
+    });
   }
 
   /**
@@ -29,31 +35,24 @@ export class CryptoComponent implements OnInit {
    * @argument Key Password.
    * @returns Key ID, Public Key.
    */
-  public f() {
-    const url = 'http://localhost:8080/genKeys';
+  public onGenerateKeys() {
+    const url = 'http://localhost:8080/generateKeyPair';
     this.http.get(url,
-      { responseType: 'text' }).subscribe(
-        res => {
-          this.text = res;
-          console.log(res);
-        },
-      );
+      {
+        params: new HttpParams().set('keyPassword', this.keyForm.get('keyPassword').value)
+      },
+    ).subscribe(
+      (res: Response) => {
+        if (Object.values(res)[0] + '' === '500') {
+          console.log('Key failed to generate');
+        } else {
+          this.publicKey = Object.values(res)[0];
+        }
+      },
+    );
   }
 
-  public onGenerateKeys() {
-    const url = 'http://localhost:8080/genKeys';
-    this.http.get<string>(url,
-      {
-   //     params: new HttpParams().set('id', this.apiService)
-      },
-      ).subscribe(
-        res => {
-          const returnValues = Object.values(res);
-          console.log(returnValues);
-          this.text = returnValues[1];
-        },
-      );
-  }
+
 
   /**
    *  Shows the public key for the user.
@@ -159,7 +158,7 @@ export class CryptoComponent implements OnInit {
           const returnValues = Object.values(res);
           console.log(returnValues);
           this.text = returnValues[1];
-          
+
         },
       );
   }

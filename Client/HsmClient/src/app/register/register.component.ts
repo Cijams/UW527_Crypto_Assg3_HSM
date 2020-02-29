@@ -4,6 +4,7 @@ import { HttpParams, HttpClient } from '@angular/common/http';
 import { ApiService } from '../api.service';
 import { ActivatedRoute, Router, } from '@angular/router';
 import { Route } from '@angular/compiler/src/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-register',
@@ -20,7 +21,9 @@ export class RegisterComponent implements OnInit {
     private formBuilder: FormBuilder,
     private http: HttpClient,
     private apiService: ApiService,
-    private route: Router
+    private _snackBar: MatSnackBar,
+    private route: Router,
+
   ) {
     this.location = location;
   }
@@ -48,7 +51,7 @@ export class RegisterComponent implements OnInit {
         console.log(returnValues);
 
         if (!!returnValues[0]) {
-          this.route.navigate(['/crypto']);
+          this.route.navigate(['/login']);
         } else {
           this.isHidden = false;
         }

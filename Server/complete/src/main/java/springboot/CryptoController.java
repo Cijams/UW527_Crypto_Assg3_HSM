@@ -2,23 +2,24 @@ package springboot;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.HttpCookie;
-import java.net.http.HttpHeaders;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RestController
 public class CryptoController {
 
+	static String username = "";
 	@Autowired
 	private PersistenceService service;
 	// **************************** EXAMPLE **************************************
@@ -142,17 +144,6 @@ public class CryptoController {
 	 * @param User ID, User Password
 	 * @return boolean of the acceptance status of a login request.
 	 */
-	@CrossOrigin
-	@GetMapping("/login")
-	public ResponseEntity<String> login() {
-		return new ResponseEntity<String>("Response from the login method", HttpStatus.OK);
-	}
-
-	@CrossOrigin
-	@GetMapping("/genKeys")
-	public ResponseEntity<String> genKeys() {
-		return new ResponseEntity<String>("Response from the genKeys method", HttpStatus.OK);
-	}
 
 	/**
 	 * Locates the private key corresponding to the provided Key ID. Returns the
@@ -196,7 +187,7 @@ public class CryptoController {
 	 * registered users and their associated stored keys.
 	 */
 	@CrossOrigin
-	@GetMapping("/genReport")
+	@GetMapping("/generateReport")
 	public Map<String, String> genReport() {
 		HashMap<String, String> reportData = new HashMap<>();
 		// For each user, store all keys.
@@ -234,6 +225,13 @@ public class CryptoController {
 	}
 
 	// TODO: Add a salt to the hash, change to post request.
+	/**
+	 * Login request for the user. Hash of the user password is compared to the one
+	 * stored in the HSM DB.
+	 * 
+	 * @param User ID, User Password
+	 * @return boolean of the acceptance status of a login request.
+	 */
 	@CrossOrigin
 	@GetMapping("/loginUser") // TODO refactor to hash on clientside before passing over web, investigate
 								// certs
@@ -253,6 +251,7 @@ public class CryptoController {
 			String incomingHash = this.hash(password);
 			if ((service.getUserByUsername(userID).getPasswordHash() + "").equals(incomingHash + "")) {
 				data.put("Response", 200 + "");
+				username = userID;
 				return data;
 			}
 		} catch (Exception ex) {
@@ -272,42 +271,59 @@ public class CryptoController {
 	 * key is calculated as follows: KEK = HSM Secret Key XOR SHA256(Key Password).
 	 *
 	 * @param Key userID.
+	 * @throws Exception
 	 * @returns Key ID, Public Key.
 	 */
 	@CrossOrigin
-	@GetMapping("/onGenerateKeys")
+	@GetMapping("/generateKeyPair")
 	@ResponseBody
-	public static Map<String, Boolean> generateKeys(@RequestParam String keyPassword) {
-		HashMap<String, Boolean> data = new HashMap<>();
-		System.out.println("User name:" + keyPassword);
-		System.out.println("SENDING DATA TO DATABASE...");
-		// Generate a key
-		// If successful
-		data.put(keyPassword, true);
-		// else
-		data.put(keyPassword, false);
-
-		return data;
-	}
-
-	/**
-	 * Basic architecture of sending and receiving data.
-	 */
-	@CrossOrigin
-	@GetMapping("/test")
-	@ResponseBody
-	public Map<String, String> getFoos(@RequestParam String id) {
-		System.out.println(id);
-
+	public static Map<String, String> generateKeys(@RequestParam String keyPassword) throws Exception {
 		HashMap<String, String> data = new HashMap<>();
 
-		// DO SOME COOL CRYPTO
-		int test = 500;
-		test = test % 9 * 4;
+		System.out.println("key Password:" + keyPassword);
 
-		// RETURN IT
-		data.put("key", id + " and this is from spring");
-		data.put("data", test + "");
+		// Generate a key.
+		try {
+			KeyPair kp = _generateKeyPair(keyPassword);
+			PublicKey pub = kp.getPublic();
+			PrivateKey pvt = kp.getPrivate();
+
+			Base64.Encoder encoder = Base64.getEncoder();
+			String pubKey_64 = encoder.encodeToString(pub.getEncoded());
+
+			data.put("Key", pubKey_64);
+			// persist to mongodb
+		} catch (Exception e) {
+			data.put("Response", 500 + "");
+		}
 		return data;
 	}
+
+	private static KeyPair _generateKeyPair(String tweak) throws Exception {
+		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+		generator.initialize(2048, new SecureRandom(tweak.getBytes()));
+		KeyPair pair = generator.generateKeyPair();
+		return pair;
+	}
+
+	// /**
+	// * Basic architecture of sending and receiving data.
+	// */
+	// @CrossOrigin
+	// @GetMapping("/test")
+	// @ResponseBody
+	// public Map<String, String> getFoos(@RequestParam String id) {
+	// System.out.println(id);
+
+	// HashMap<String, String> data = new HashMap<>();
+
+	// // DO SOME COOL CRYPTO
+	// int test = 500;
+	// test = test % 9 * 4;
+
+	// // RETURN IT
+	// data.put("key", id + " and this is from spring");
+	// data.put("data", test + "");
+	// return data;
+	// }
 }
