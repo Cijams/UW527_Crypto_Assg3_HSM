@@ -233,6 +233,7 @@ public class CryptoController {
 		return data;
 	}
 
+	// TODO: Add a salt to the hash.
 	@CrossOrigin
 	@GetMapping("/loginUser") // TODO refactor to hash on clientside before passing over web
 	@ResponseBody
@@ -240,13 +241,26 @@ public class CryptoController {
 			throws NoSuchAlgorithmException {
 		HashMap<String, String> data = new HashMap<>();
 
+		System.out.println("hit");
+
+		// Check if there is a user with the incoming ID, along with a password.
 		if (service.getUserByUsername(userID) == null || service.getUserByUsername(userID).getPasswordHash() == null) {
 			data.put("Response", 401 + "");
-		} else if (false) {
-			// check password against hashed password
-		} else {
-			data.put("Response", 200 + "");
 		}
+
+		// Hash the incoming password, and check to see it matches the hash in the DB.
+		String incomingHash = this.hash(password);
+		if (service.getUserByUsername(userID).getPasswordHash() == incomingHash) {
+			System.out.println("Match");
+		}
+		else {
+			System.out.println(incomingHash);
+			System.out.println(service.getUserByUsername(userID).getPasswordHash());
+		}
+
+
+		data.put("Response", 200 + "");
+
 		return data;
 	}
 
