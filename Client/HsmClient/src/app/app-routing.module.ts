@@ -1,7 +1,4 @@
-import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { HomeComponent } from './home';
-import { LoginComponent } from './login';
 import { RegisterComponent } from './register';
 import { HsmLoginComponent } from './components/hsm-login/hsm-login.component';
 import { CryptoComponent } from './crypto/crypto.component';
@@ -11,7 +8,7 @@ import { CryptoComponent } from './crypto/crypto.component';
  */
 const routes: Routes = [
   {
-    path: '', component: HomeComponent
+    path: '', component: HsmLoginComponent
   },
   {
     path: 'crypto', component: CryptoComponent

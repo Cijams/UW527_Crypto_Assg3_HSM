@@ -233,34 +233,34 @@ public class CryptoController {
 		return data;
 	}
 
-	// TODO: Add a salt to the hash.
+	// TODO: Add a salt to the hash, change to post request.
 	@CrossOrigin
-	@GetMapping("/loginUser") // TODO refactor to hash on clientside before passing over web
+	@GetMapping("/loginUser") // TODO refactor to hash on clientside before passing over web, investigate
+								// certs
 	@ResponseBody
 	public Map<String, String> loginUser(@RequestParam String userID, @RequestParam String password)
 			throws NoSuchAlgorithmException {
 		HashMap<String, String> data = new HashMap<>();
+		try {
+			// Check if there is a user with the incoming ID, along with a password.
+			if (service.getUserByUsername(userID) == null
+					|| service.getUserByUsername(userID).getPasswordHash() == null) {
+				data.put("Response", 401 + "");
+				return data;
+			}
 
-		System.out.println("hit");
-
-		// Check if there is a user with the incoming ID, along with a password.
-		if (service.getUserByUsername(userID) == null || service.getUserByUsername(userID).getPasswordHash() == null) {
+			// Hash the incoming password, and check to see it matches the hash in the DB.
+			String incomingHash = this.hash(password);
+			if ((service.getUserByUsername(userID).getPasswordHash() + "").equals(incomingHash + "")) {
+				data.put("Response", 200 + "");
+				return data;
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			System.err.println("Login failed");
 			data.put("Response", 401 + "");
+			return data;
 		}
-
-		// Hash the incoming password, and check to see it matches the hash in the DB.
-		String incomingHash = this.hash(password);
-		if (service.getUserByUsername(userID).getPasswordHash() == incomingHash) {
-			System.out.println("Match");
-		}
-		else {
-			System.out.println(incomingHash);
-			System.out.println(service.getUserByUsername(userID).getPasswordHash());
-		}
-
-
-		data.put("Response", 200 + "");
-
 		return data;
 	}
 

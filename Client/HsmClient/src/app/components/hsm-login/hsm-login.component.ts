@@ -12,11 +12,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 })
 export class HsmLoginComponent implements OnInit {
   loginForm: FormGroup;
-  location: Location
+  location: Location;
+  isHidden = true;
   constructor(
     private formBuilder: FormBuilder,
-    private http: HttpClient
-  ) { 
+    private http: HttpClient,
+    private route: Router
+  ) {
     this.location = location;
   }
 
@@ -36,14 +38,12 @@ export class HsmLoginComponent implements OnInit {
       },
     ).subscribe(
       (res: Response) => {
-        if (Object.values(res)[0]+"" === "200") {
-          console.log("auth");
-          this.location.assign("crypto"); // TODO dont reload page, use spa.
-         }
-         else {
-           //this.location.assign("unauthorized");
-           console.log("Unauthorized");
-         }
+        if (Object.values(res)[0] + '' === '200') {
+          console.log('auth');
+          this.route.navigate(['/crypto']);
+        } else {
+          this.isHidden = false;
+        }
       },
     );
   }

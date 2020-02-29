@@ -146,6 +146,7 @@ export class CryptoComponent implements OnInit {
       );
   }
 
+  // TODO: On register user, toast their success.
   public onRegisterUser() {
     const data = 'This is from angular';
     const url = 'http://localhost:8080/registerUser';
