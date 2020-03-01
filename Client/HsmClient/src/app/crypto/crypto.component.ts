@@ -73,14 +73,22 @@ export class CryptoComponent implements OnInit {
    * @returns RSA(Text, Private Key from HSM DB)
    */
   public onEncrypt() {
+    const testText = 'Testing';
+    const testKeyID = 'KeyID';
+    const testKeyPassword = 'KeyPassword';
+
     const url = 'http://localhost:8080/encrypt';
     this.http.get(url,
-      { responseType: 'text' }).subscribe(
-        res => {
-          this.text = res;
-          console.log(res);
-        },
-      );
+      {
+        params: new HttpParams().set('text', testText)
+        .append('KeyID', testKeyID)
+        .append('KeyPassword', testKeyPassword)
+      },
+    ).subscribe(
+      (res: Response) => {
+        console.log(res);
+      },
+    );
   }
 
 

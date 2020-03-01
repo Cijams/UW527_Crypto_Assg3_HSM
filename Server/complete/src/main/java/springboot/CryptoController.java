@@ -2,6 +2,7 @@ package springboot;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -10,12 +11,16 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Signature;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,35 +41,6 @@ public class CryptoController {
 	static String username = "";
 	@Autowired
 	private PersistenceService service;
-	// **************************** EXAMPLE **************************************
-
-	// FOLLOW THIS FORMAT AND YOU CAN DO ANYTHING. WILL DO A POST REQUEST EXAMPLE
-	// ASAP.
-	// FLUFF
-	@GetMapping
-	@RequestMapping("/encrypt-example")
-
-	// METHOD
-	public Map<String, String> encryptExample() {
-		// MAP FOR RETURN VALUES. CAN DO RAW VALUES TOO, OBJECTS ARE AUTO JSON'D GOING
-		// BACK TO CLIENT
-		HashMap<String, String> All_MY_DATA = new HashMap<>();
-
-		// DO SOME COOL CRYPTO
-		int test = 500;
-		test = test % 9 * 4;
-
-		// RETURN IT
-		All_MY_DATA.put("key", test + "");
-		return All_MY_DATA;
-	}
-
-	// *******************************************************************************************
-
-	/**
-	 * TO-DO - Decide which of these will be post or get requests and perform the
-	 * respectful crypto operation.
-	 */
 
 	/**
 	 * Basic return data for home page.
@@ -90,7 +66,7 @@ public class CryptoController {
 		return new ResponseEntity<String>(hexString.toString(), HttpStatus.OK);
 	}
 
-	public String hash(String input) throws NoSuchAlgorithmException {
+	private String _hash(String input) throws NoSuchAlgorithmException {
 		byte[] sha2 = new byte[0];
 		StringBuilder hexString = null;
 		sha2 = generateSha2(input);
@@ -124,30 +100,6 @@ public class CryptoController {
 		return hexString;
 	}
 
-	// /**
-	// * Registers a user with a password to the HSM database.
-	// *
-	// * @param User ID, User Password
-	// * @return boolean of the acceptance status of a register request.
-	// */
-	// @CrossOrigin
-	// @GetMapping("/register")
-	// public ResponseEntity<String> register() {
-	// // User user = new User();
-	// // user.setUserName("Henry");
-	// // user.setPasswordHash(passwordHash);
-	// return new ResponseEntity<String>("Response from the register method",
-	// HttpStatus.OK);
-	// }
-
-	/**
-	 * Login request for the user. Hash of the user password is compared to the one
-	 * stored in the HSM DB.
-	 * 
-	 * @param User ID, User Password
-	 * @return boolean of the acceptance status of a login request.
-	 */
-
 	/**
 	 * Locates the private key corresponding to the provided Key ID. Returns the
 	 * encryption of the provided text.
@@ -157,32 +109,11 @@ public class CryptoController {
 	 */
 	@CrossOrigin
 	@GetMapping("/encrypt")
-	public ResponseEntity<String> encrypt() {
-		return new ResponseEntity<String>("Response from the encrypt method", HttpStatus.OK);
-	}
+	public Map<String, String> encrypt() {
+		LinkedHashMap<String, String> encryptionStatus = new LinkedHashMap<>();
 
-	@CrossOrigin
-	@GetMapping("/getKeys")
-	public ResponseEntity<String> getKeys() {
-		return new ResponseEntity<String>("Response from the getKeys method", HttpStatus.OK);
-	}
-
-	@CrossOrigin
-	@GetMapping("/decrypt")
-	public ResponseEntity<String> decrypt() {
-		return new ResponseEntity<String>("Response from the decrypt method", HttpStatus.OK);
-	}
-
-	@CrossOrigin
-	@GetMapping("/sign")
-	public ResponseEntity<String> sign() {
-		return new ResponseEntity<String>("Response from the sign method", HttpStatus.OK);
-	}
-
-	@CrossOrigin
-	@GetMapping("/displayKeys")
-	public ResponseEntity<String> displayKeys() {
-		return new ResponseEntity<String>("Response from the displayKeys method", HttpStatus.OK);
+		encryptionStatus.put("Key", "Yes");
+		return encryptionStatus;
 	}
 
 	/**
@@ -200,14 +131,14 @@ public class CryptoController {
 
 		users = service.findAllUsers();
 
-		for(int i = 0; i < users.size(); i++) {
+		for (int i = 0; i < users.size(); i++) {
 			String addedKey = "";
 			aUser = (User) users.get(i);
 			keys = aUser.getKeys();
-			if(keys != null && !keys.isEmpty()) {
+			if (keys != null && !keys.isEmpty()) {
 				addedKey = aUser.getKeys().toString();
 			}
-			reportData.put(aUser+"", addedKey);
+			reportData.put(aUser + "", addedKey);
 		}
 
 		System.out.println(reportData.toString());
@@ -235,7 +166,7 @@ public class CryptoController {
 		System.out.println("User name:" + userID + "\nPassword: " + password);
 		User user = new User();
 		user.setUserName(userID);
-		String hash = this.hash(password);
+		String hash = this._hash(password);
 		user.setPasswordHash(hash);
 		service.createUser(user.getUserName(), user.getPasswordHash());
 		data.put(userID, true);
@@ -252,8 +183,7 @@ public class CryptoController {
 	 * @return boolean of the acceptance status of a login request.
 	 */
 	@CrossOrigin
-	@GetMapping("/loginUser") // TODO refactor to hash on clientside before passing over web, investigate
-								// certs
+	@GetMapping("/loginUser") // TODO refactor to hash on clientside before passing over web, certs
 	@ResponseBody
 	public Map<String, String> loginUser(@RequestParam String userID, @RequestParam String password)
 			throws NoSuchAlgorithmException {
@@ -267,7 +197,7 @@ public class CryptoController {
 			}
 
 			// Hash the incoming password, and check to see it matches the hash in the DB.
-			String incomingHash = this.hash(password);
+			String incomingHash = this._hash(password);
 			if ((service.getUserByUsername(userID).getPasswordHash() + "").equals(incomingHash + "")) {
 				data.put("Response", 200 + "");
 				username = userID;
@@ -297,11 +227,15 @@ public class CryptoController {
 	@GetMapping("/generateKeyPair")
 	@ResponseBody
 	public Map<String, String> generateKeys(@RequestParam String keyPassword) throws Exception {
+		if (service.getMasterKey() == null) {
+			String hashForMasterKey = _hash("masterKeyPassword"); // TODO put in own method
+			service.setMasterKey(hashForMasterKey);
+		}
+		// Initialize return map and base64 encoder
 		HashMap<String, String> data = new HashMap<>();
 		Base64.Encoder encoder = Base64.getEncoder();
 
-		System.out.println("key Password:" + keyPassword);
-		// Generate a key.
+		// Generate a key pair.
 		try {
 			KeyPair kp = _generateKeyPair(keyPassword);
 			PublicKey pub = kp.getPublic();
@@ -314,12 +248,25 @@ public class CryptoController {
 			// Private Key.
 			String privKey_64 = encoder.encodeToString(pvt.getEncoded());
 
-			// Associate user with a key, and persist to database.
+			// Generate a keyID.
 			String keyID = calcKeyID(keyPassword);
 			data.put("keyID", keyID);
+
+			// Associate user with a key, and persist to database.
 			service.createKey(username, keyID, privKey_64);
-			
-			
+
+			// Calculate Key Encryption Key (KEK)
+			// KEK == (HSMSecretKey) XOR (SHA256(KeyPassword))
+
+			try {
+				String sha256KeyPass = _hash(keyPassword);
+				String keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
+				System.out.println(keyEncryptionKey);
+			} catch (Exception e) {
+				e.printStackTrace(System.err);
+			}
+
+
 		} catch (Exception e) {
 			data.put("Response", 500 + "");
 		}
@@ -336,7 +283,7 @@ public class CryptoController {
 	private String calcKeyID(String keypass) {
 		String passHash = null;
 		try {
-			passHash = hash(keypass);
+			passHash = _hash(keypass);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		}
@@ -344,26 +291,105 @@ public class CryptoController {
 		return keyID;
 	}
 
-	// String keyID = calcKeyID( WHO_AM_I, keypass );
+	private static String _xorHex(String a, String b) {
+		char[] chars = new char[a.length()];
+		for (int i = 0; i < chars.length; i++) {
+			chars[i] = _toHex(_fromHex(a.charAt(i)) ^ _fromHex(b.charAt(i)));
+		}
+		return new String(chars);
+	}
 
-	// /**
-	// * Basic architecture of sending and receiving data.
-	// */
-	// @CrossOrigin
-	// @GetMapping("/test")
-	// @ResponseBody
-	// public Map<String, String> getFoos(@RequestParam String id) {
-	// System.out.println(id);
+	private static int _fromHex(char c) {
+		if (c >= '0' && c <= '9') {
+			return c - '0';
+		}
+		if (c >= 'A' && c <= 'F') {
+			return c - 'A' + 10;
+		}
+		if (c >= 'a' && c <= 'f') {
+			return c - 'a' + 10;
+		}
+		throw new IllegalArgumentException();
+	}
 
-	// HashMap<String, String> data = new HashMap<>();
+	private static char _toHex(int nybble) {
+		if (nybble < 0 || nybble > 15) {
+			throw new IllegalArgumentException();
+		}
+		char retChar = "0123456789abcdef".charAt(nybble);
+		return retChar;
+	}
 
-	// // DO SOME COOL CRYPTO
-	// int test = 500;
-	// test = test % 9 * 4;
+	/** REFACTOR THIS WITHOUT STATIC */
+	public static String encrypt_AES(String plaintext, String secret) {
+		try {
+			setKey(secret);
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+			return Base64.getEncoder().encodeToString(cipher.doFinal(plaintext.getBytes("UTF-8")));
+		} catch (Exception e) {
+			System.out.println("Encryption error: " + e.toString());
+		}
+		return null;
+	}
 
-	// // RETURN IT
-	// data.put("key", id + " and this is from spring");
-	// data.put("data", test + "");
-	// return data;
-	// }
+	private static SecretKeySpec secretKey; // Used by AES encrypt/decrypt
+	private static byte[] key;
+
+	public static void setKey(String myKey) {
+		MessageDigest sha = null;
+		try {
+			key = myKey.getBytes("UTF-8");
+			sha = MessageDigest.getInstance("SHA-1");
+			key = sha.digest(key);
+			key = Arrays.copyOf(key, 16);
+			secretKey = new SecretKeySpec(key, "AES");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static boolean confirmKVC(String kvcToConfirm, String tgtval, String kek) {
+		boolean retbool = true;
+		String decryption = decrypt_AES(kvcToConfirm, kek);
+		retbool = decryption.equals(tgtval);
+		return retbool;
+	}
+
+	public static String decrypt_AES(String ciphertext, String secret) {
+		try {
+			setKey(secret);
+			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+			cipher.init(Cipher.DECRYPT_MODE, secretKey);
+			String retString = new String(cipher.doFinal(Base64.getDecoder().decode(ciphertext)));
+			return retString;
+		} catch (Exception e) {
+			System.out.println("Decryption error: " + e.toString());
+		}
+		return null;
+	}
+
+	public static String sign(String plainText, PrivateKey privateKey) throws Exception {
+		Signature privateSignature = Signature.getInstance("SHA256withRSA");
+		privateSignature.initSign(privateKey);
+		privateSignature.update(plainText.getBytes(UTF_8));
+	
+		byte[] signature = privateSignature.sign();
+	
+		return Base64.getEncoder().encodeToString(signature);
+	  } // Closing sign()
+	  
+	  public static boolean verify(String plainText, String signature, PublicKey publicKey) throws Exception {
+		Signature publicSignature = Signature.getInstance("SHA256withRSA");
+		publicSignature.initVerify(publicKey);
+		publicSignature.update(plainText.getBytes(UTF_8));
+	
+		byte[] signatureBytes = Base64.getDecoder().decode(signature);
+	
+		return publicSignature.verify(signatureBytes);
+	  }
+	/** END OF REFACTOR */
+
 }
