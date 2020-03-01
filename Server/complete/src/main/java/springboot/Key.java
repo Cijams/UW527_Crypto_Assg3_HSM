@@ -68,4 +68,9 @@ public class Key {
 		this.value = value;
 	}
 		
+	@Override
+	public String toString() {
+		return "keyId = " + keyId + " : Value = " + value;
+	}
+	
 }
