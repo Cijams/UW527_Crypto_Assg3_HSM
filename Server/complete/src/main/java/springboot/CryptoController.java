@@ -309,14 +309,17 @@ public class CryptoController {
 
 			// Public key.
 			String pubKey_64 = encoder.encodeToString(pub.getEncoded());
-			data.put("Key", pubKey_64);
+			data.put("key", pubKey_64);
 
 			// Private Key.
 			String privKey_64 = encoder.encodeToString(pvt.getEncoded());
 
 			// Associate user with a key, and persist to database.
 			String keyID = calcKeyID(keyPassword);
+			data.put("keyID", keyID);
 			service.createKey(username, keyID, privKey_64);
+			
+			
 		} catch (Exception e) {
 			data.put("Response", 500 + "");
 		}
