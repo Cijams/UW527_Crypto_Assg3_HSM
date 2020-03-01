@@ -10,18 +10,15 @@
             <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
                 (click)="onGenerateKeys()">Generate Keys</button>
             <input type="text" formControlName="keyPassword" placeholder="Key Password">
-            <p class="container" style="background-color: grey; float: right; max-width: 400px; overflow:auto; height: 200px;">{{ publicKey }} </p>
+            <p class="container"
+                style="background-color: grey; float: right; max-width: 900px; height: 200px;">
+                {{ publicKey }} </p>
         </div>
 
         <div class="form-group" style="margin-left: 10px;">
             {{text}}
+
             <!-- Buttons -->
-            <div>
-                <button id="btn" style="color:white !important; width: 125px;" mat-raised-button (click)="onTest()">POST
-                    TEST </button>
-            </div>
-
-
             <div style="padding-bottom: 15px;">
                 <button id="btn" style="color:white !important; width: 125px;" mat-raised-button
                     (click)="onDisaplayKeys()">Display Keys</button>

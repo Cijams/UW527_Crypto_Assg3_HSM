@@ -12,6 +12,9 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,11 +192,26 @@ public class CryptoController {
 	@CrossOrigin
 	@GetMapping("/generateReport")
 	public Map<String, String> genReport() {
-		HashMap<String, String> reportData = new HashMap<>();
-		// For each user, store all keys.
+		LinkedHashMap<String, String> reportData = new LinkedHashMap<>();
+
+		List users = null;
+		List keys = null;
+		User aUser = null;
+
+		users = service.findAllUsers();
+
+		for(int i = 0; i < users.size(); i++) {
+			String addedKey = "";
+			aUser = (User) users.get(i);
+			keys = aUser.getKeys();
+			if(keys != null && !keys.isEmpty()) {
+				addedKey = aUser.getKeys().toString();
+			}
+			reportData.put(aUser+"", addedKey);
+		}
+
+		System.out.println(reportData.toString());
 		return reportData;
-		// return new ResponseEntity<String>("Response from the genReport method",
-		// HttpStatus.OK);
 	}
 
 	/**
@@ -222,6 +240,7 @@ public class CryptoController {
 		service.createUser(user.getUserName(), user.getPasswordHash());
 		data.put(userID, true);
 		return data;
+
 	}
 
 	// TODO: Add a salt to the hash, change to post request.
@@ -277,22 +296,27 @@ public class CryptoController {
 	@CrossOrigin
 	@GetMapping("/generateKeyPair")
 	@ResponseBody
-	public static Map<String, String> generateKeys(@RequestParam String keyPassword) throws Exception {
+	public Map<String, String> generateKeys(@RequestParam String keyPassword) throws Exception {
 		HashMap<String, String> data = new HashMap<>();
+		Base64.Encoder encoder = Base64.getEncoder();
 
 		System.out.println("key Password:" + keyPassword);
-
 		// Generate a key.
 		try {
 			KeyPair kp = _generateKeyPair(keyPassword);
 			PublicKey pub = kp.getPublic();
 			PrivateKey pvt = kp.getPrivate();
 
-			Base64.Encoder encoder = Base64.getEncoder();
+			// Public key.
 			String pubKey_64 = encoder.encodeToString(pub.getEncoded());
-
 			data.put("Key", pubKey_64);
-			// persist to mongodb
+
+			// Private Key.
+			String privKey_64 = encoder.encodeToString(pvt.getEncoded());
+
+			// Associate user with a key, and persist to database.
+			String keyID = calcKeyID(keyPassword);
+			service.createKey(username, keyID, privKey_64);
 		} catch (Exception e) {
 			data.put("Response", 500 + "");
 		}
@@ -305,6 +329,19 @@ public class CryptoController {
 		KeyPair pair = generator.generateKeyPair();
 		return pair;
 	}
+
+	private String calcKeyID(String keypass) {
+		String passHash = null;
+		try {
+			passHash = hash(keypass);
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+		}
+		String keyID = username + " " + passHash;
+		return keyID;
+	}
+
+	// String keyID = calcKeyID( WHO_AM_I, keypass );
 
 	// /**
 	// * Basic architecture of sending and receiving data.

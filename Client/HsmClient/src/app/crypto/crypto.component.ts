@@ -52,8 +52,6 @@ export class CryptoComponent implements OnInit {
     );
   }
 
-
-
   /**
    *  Shows the public key for the user.
    */
@@ -135,51 +133,20 @@ export class CryptoComponent implements OnInit {
    * users and stored keys.
    */
   public onGenReport() {
-    const url = 'http://localhost:8080/genReport';
+    const url = 'http://localhost:8080/generateReport';
     this.http.get(url,
-      { responseType: 'text' }).subscribe(
-        res => {
-          this.text = res;
-          console.log(res);
-        },
-      );
-  }
-
-  // TODO: On register user, toast their success.
-  public onRegisterUser() {
-    const data = 'This is from angular';
-    const url = 'http://localhost:8080/registerUser';
-    this.http.get<string>(url,
       {
-        params: new HttpParams().set('id', data)
+        params: new HttpParams().set('keyPassword', this.keyForm.get('keyPassword').value)
       },
-      ).subscribe(
-        res => {
-          const returnValues = Object.values(res);
-          console.log(returnValues);
-          this.text = returnValues[1];
-
-        },
-      );
-  }
-
-  /**
-   *  Basic architecture of sending and receiving data.
-   */
-  public onTest() {
-    const data = 'This is from angular';
-    const url = 'http://localhost:8080/test';
-    this.http.get<string>(url,
-      {
-        params: new HttpParams().set('id', data)
+    ).subscribe(
+      (res) => {
+        let print = '';
+        for (const [key, value] of Object.entries(res)) {
+          print += (`${key}: ${value}` + ' | ');
+        }
+        console.log(res);
+        this.publicKey = print;
       },
-      ).subscribe(
-        res => {
-          const returnValues = Object.values(res);
-          console.log(returnValues[1]);
-          this.text = returnValues[1];
-        },
-      );
+    );
   }
-
 }
