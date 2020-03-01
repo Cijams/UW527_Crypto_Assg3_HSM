@@ -24,20 +24,6 @@ public class PersistenceServiceImplTest {
 	private User testUser1;
 	private User testUser2;
 	
-    @Before
-    public void setUp() throws Exception {
-        
-    	// create test users
-    	testUser1 = new User();
-    	testUser1.setUserName( "Smeghead" );
-    	testUser1 = service.createUser( testUser1 );
-
-    	testUser2 = new User();
-    	testUser2.setUserName( "dlister" );
-    	testUser2 = service.createUser( testUser2 );
-
-    }
-
     @After
     public void cleanUp() throws Exception {
     	
@@ -48,6 +34,30 @@ public class PersistenceServiceImplTest {
     	// reset master key
     	service.setMasterKey( "FEEDFACECAFEBEEF" );
 
+    }
+
+    @Test
+    public void createDeleteKey() {
+    	
+    	String keyId = "OpenVMS";
+    	String keyValue = "Forever";
+    	
+    	// create the key
+    	Key newKey = service.createKey( testUser2.getUserName(), keyId, keyValue );
+    	
+    	// retrieve the test user again
+    	User user = service.getUserByUsername( testUser2.getUserName() );
+    	
+    	// should exist
+    	assertThat( newKey ).as( "New Key should not be NULL!" ).isNotNull();
+    	assertThat( user.getKeys().contains( newKey ) ).as( "New Key should have been associated with test user" ).isTrue();
+    	
+    	// delete the Key
+    	user = service.deleteKey( testUser2.getUserName(), keyId );
+    	
+    	// should no longer exist
+    	assertThat( user.getKeys().contains( newKey ) ).as( "New Key should no longer be associated with test user" ).isFalse();
+    	
     }
     
     @Test
@@ -87,59 +97,6 @@ public class PersistenceServiceImplTest {
     }
     
     @Test
-    public void updateUser() {
-    	
-    	String newFieldValue = "DEADBEEF";
-    	
-    	// change a User field
-    	testUser1.setPasswordHash( newFieldValue );
-    	service.updateUser( testUser1 );
-    	
-    	// make sure the change was persisted
-    	User userCopy = service.getUserByUsername( testUser1.getUserName() );
-    	assertThat( userCopy.getPasswordHash() ).as( "Password field change must be persisted!" ).isEqualTo( newFieldValue );
-    	
-    }
-    
-    @Test
-    public void masterKeyPersist() {
-    	
-    	String masterKeyValue = "AE559426858CA3CF50F32D7B3F881560B6C3B4FA32AC265DDBBD7ABC6FECD5CA";
-    	
-    	// set the master key first
-    	service.setMasterKey( masterKeyValue );
-    	
-    	// retrieve the master key and verify value set
-    	Key masterKey = service.getMasterKey();
-    	assertThat( masterKey.getValue() ).as( "Master key value should be set properly!" ).isEqualTo( masterKeyValue );
-    	
-    }
-    
-    @Test
-    public void createDeleteKey() {
-    	
-    	String keyId = "OpenVMS";
-    	String keyValue = "Forever";
-    	
-    	// create the key
-    	Key newKey = service.createKey( testUser2.getUserName(), keyId, keyValue );
-    	
-    	// retrieve the test user again
-    	User user = service.getUserByUsername( testUser2.getUserName() );
-    	
-    	// should exist
-    	assertThat( newKey ).as( "New Key should not be NULL!" ).isNotNull();
-    	assertThat( user.getKeys().contains( newKey ) ).as( "New Key should have been associated with test user" ).isTrue();
-    	
-    	// delete the Key
-    	user = service.deleteKey( testUser2.getUserName(), keyId );
-    	
-    	// should no longer exist
-    	assertThat( user.getKeys().contains( newKey ) ).as( "New Key should no longer be associated with test user" ).isFalse();
-    	
-    }
-    
-	@Test
 	public void getCount() {
 
 		// get the current value of a counter
@@ -156,4 +113,66 @@ public class PersistenceServiceImplTest {
 		
 	}
     
+    @Test
+	public void getKeyValueById() {
+		
+    	String keyId = "Jaguar";
+    	String keyValue = "XJ6";
+    	
+    	// create a test key
+    	Key newKey = service.createKey( testUser1.getUserName(), keyId, keyValue );
+
+		// try getting the value of a key we know exists
+		String value = service.getKeyValueById( keyId );
+		assertThat( value ).as( "Should be able to find Key by ID!" ).isEqualTo( keyValue );
+
+		// try getting the value of a non-existent Key
+		value = service.getKeyValueById( "HolyGrail" );
+		assertThat( value ).as( "Should get a NULL return when requesting value of a key that doesn't exist!" ).isNull();
+
+	}
+    
+    @Test
+    public void masterKeyPersist() {
+    	
+    	String masterKeyValue = "AE559426858CA3CF50F32D7B3F881560B6C3B4FA32AC265DDBBD7ABC6FECD5CA";
+    	
+    	// set the master key first
+    	service.setMasterKey( masterKeyValue );
+    	
+    	// retrieve the master key and verify value set
+    	Key masterKey = service.getMasterKey();
+    	assertThat( masterKey.getValue() ).as( "Master key value should be set properly!" ).isEqualTo( masterKeyValue );
+    	
+    }
+    
+	@Before
+    public void setUp() throws Exception {
+        
+    	// create test users
+    	testUser1 = new User();
+    	testUser1.setUserName( "Smeghead" );
+    	testUser1 = service.createUser( testUser1 );
+
+    	testUser2 = new User();
+    	testUser2.setUserName( "dlister" );
+    	testUser2 = service.createUser( testUser2 );
+
+    }
+    
+	@Test
+    public void updateUser() {
+    	
+    	String newFieldValue = "DEADBEEF";
+    	
+    	// change a User field
+    	testUser1.setPasswordHash( newFieldValue );
+    	service.updateUser( testUser1 );
+    	
+    	// make sure the change was persisted
+    	User userCopy = service.getUserByUsername( testUser1.getUserName() );
+    	assertThat( userCopy.getPasswordHash() ).as( "Password field change must be persisted!" ).isEqualTo( newFieldValue );
+    	
+    }
+	
 }
