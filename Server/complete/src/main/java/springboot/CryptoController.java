@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
@@ -12,6 +13,8 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
@@ -19,7 +22,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +43,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @RestController
 public class CryptoController {
-
+	private static final String KVC_PASSPHRASE = "test";
 	static String username = "";
 	@Autowired
 	private PersistenceService service;
@@ -109,11 +115,36 @@ public class CryptoController {
 	 */
 	@CrossOrigin
 	@GetMapping("/encrypt")
-	public Map<String, String> encrypt() {
-		LinkedHashMap<String, String> encryptionStatus = new LinkedHashMap<>();
+	@ResponseBody
+	public Map<String, String> encrypt(@RequestParam String text, @RequestParam String eKeyID,
+			@RequestParam String keyPassword) throws NoSuchAlgorithmException {
+		HashMap<String, String> data = new HashMap<>();
 
-		encryptionStatus.put("Key", "Yes");
-		return encryptionStatus;
+		System.out.println(text);
+		System.out.println(eKeyID);
+		System.out.println(keyPassword);
+
+		System.out.println(service.getKeyValueById(eKeyID));
+
+		String prtKey = service.getKeyValueById(eKeyID);
+		// Key privateKey = new Key();
+		// privateKey.setValue(service.getKeyValueById(eKeyID));
+//
+	//	PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedKey));
+
+	//	String encryptedText = encrypt_RSA(text, Key);
+
+		data.put("Key", "Yes");
+		return data;
+	}
+
+	public static String encrypt_RSA(String plainText, PrivateKey privateKey) throws Exception {
+		Cipher encryptCipher = Cipher.getInstance("RSA");
+		encryptCipher.init(Cipher.ENCRYPT_MODE, privateKey);
+
+		byte[] cipherText = encryptCipher.doFinal(plainText.getBytes(UTF_8));
+
+		return Base64.getEncoder().encodeToString(cipherText);
 	}
 
 	/**
@@ -252,20 +283,27 @@ public class CryptoController {
 			String keyID = calcKeyID(keyPassword);
 			data.put("keyID", keyID);
 
+			// Encrypt with AES256 the private key
+
 			// Associate user with a key, and persist to database.
 			service.createKey(username, keyID, privKey_64);
 
 			// Calculate Key Encryption Key (KEK)
-			// KEK == (HSMSecretKey) XOR (SHA256(KeyPassword))
-
+			// KEK = (HSMSecretKey) XOR (SHA256(KeyPassword))
+			String keyEncryptionKey = "";
 			try {
 				String sha256KeyPass = _hash(keyPassword);
-				String keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
-				System.out.println(keyEncryptionKey);
+				keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
+				String pvtKey_encrypted = encrypt_AES(privKey_64, keyEncryptionKey);
+				service.createKey(username, keyID, pvtKey_encrypted);
 			} catch (Exception e) {
 				e.printStackTrace(System.err);
 			}
+			data.put(keyID, pubKey_64); // still need to store this in the user, send it to them on reg
 
+			// Calculate Key Verification Code (KVC)
+			String plaintext = KVC_PASSPHRASE;
+			String kekVerificationCode = encrypt_AES(plaintext, keyEncryptionKey); // store this, use it.
 
 		} catch (Exception e) {
 			data.put("Response", 500 + "");
@@ -287,7 +325,7 @@ public class CryptoController {
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		}
-		String keyID = username + " " + passHash;
+		String keyID = username + "-" + passHash.substring(0, 7); // questionable... user needs to be logged in
 		return keyID;
 	}
 
@@ -375,21 +413,21 @@ public class CryptoController {
 		Signature privateSignature = Signature.getInstance("SHA256withRSA");
 		privateSignature.initSign(privateKey);
 		privateSignature.update(plainText.getBytes(UTF_8));
-	
+
 		byte[] signature = privateSignature.sign();
-	
+
 		return Base64.getEncoder().encodeToString(signature);
-	  } // Closing sign()
-	  
-	  public static boolean verify(String plainText, String signature, PublicKey publicKey) throws Exception {
+	} // Closing sign()
+
+	public static boolean verify(String plainText, String signature, PublicKey publicKey) throws Exception {
 		Signature publicSignature = Signature.getInstance("SHA256withRSA");
 		publicSignature.initVerify(publicKey);
 		publicSignature.update(plainText.getBytes(UTF_8));
-	
+
 		byte[] signatureBytes = Base64.getDecoder().decode(signature);
-	
+
 		return publicSignature.verify(signatureBytes);
-	  }
+	}
 	/** END OF REFACTOR */
 
 }

@@ -15,6 +15,7 @@ export class CryptoComponent implements OnInit {
   keyForm: FormGroup;
   text; // Testing text for ensuring calls work REMOVE ME
   publicKey = 'Key goes here';
+  eKeyID = '';
 
   constructor(private http: HttpClient,
               private formBuilder: FormBuilder) { }
@@ -47,6 +48,10 @@ export class CryptoComponent implements OnInit {
           console.log('Key failed to generate');
         } else {
           this.publicKey = Object.values(res)[0];
+          this.eKeyID = Object.keys(res)[0];
+          console.log(this.publicKey);
+          console.log(this.eKeyID);
+          console.log(res);
         }
       },
     );
@@ -73,16 +78,14 @@ export class CryptoComponent implements OnInit {
    * @returns RSA(Text, Private Key from HSM DB)
    */
   public onEncrypt() {
-    const testText = 'Testing';
-    const testKeyID = 'KeyID';
-    const testKeyPassword = 'KeyPassword';
-
+    const testText = 'Encrypt Me';
+    const testKeyPassword = 'myPassword';
     const url = 'http://localhost:8080/encrypt';
     this.http.get(url,
       {
         params: new HttpParams().set('text', testText)
-        .append('KeyID', testKeyID)
-        .append('KeyPassword', testKeyPassword)
+        .append('eKeyID', this.eKeyID)
+        .append('keyPassword', testKeyPassword)
       },
     ).subscribe(
       (res: Response) => {
