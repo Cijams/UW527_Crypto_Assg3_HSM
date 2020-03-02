@@ -206,15 +206,20 @@ public class CryptoController {
 			data.put(userID, false);
 			return data;
 		}
-		System.out.println("User name:" + userID + "\nPassword: " + password);
-		User user = new User();
-		user.setUserName(userID);
-		String hash = this._hash(password);
-		user.setPasswordHash(hash);
-		service.createUser(user.getUserName(), user.getPasswordHash());
-		data.put(userID, true);
-		return data;
-
+		try {
+			System.out.println("User name:" + userID + "\nPassword: " + password);
+			User user = new User();
+			user.setUserName(userID);
+			String hash = this._hash(password);
+			user.setPasswordHash(hash);
+			service.createUser(user.getUserName(), user.getPasswordHash());
+			data.put(userID, true);
+			return data;
+		} catch (Exception e) {
+			System.err.println(e.getStackTrace());
+			data.put("Unable to login", false);
+			return data;
+		}
 	}
 
 	@CrossOrigin
@@ -248,7 +253,7 @@ public class CryptoController {
 
 		boolean isCorrect = verify(text, signature, TEMPPUBKEY);
 
-		data.put("data is:", isCorrect)
+		data.put("data is:", isCorrect);
 		return data;
 	}
 
@@ -267,27 +272,69 @@ public class CryptoController {
 			throws NoSuchAlgorithmException {
 		HashMap<String, String> data = new HashMap<>();
 		try {
-			// Check if there is a user with the incoming ID, along with a password.
-			if (service.getUserByUsername(userID) == null
-					|| service.getUserByUsername(userID).getPasswordHash() == null) {
-				data.put("Response", 401 + "");
-				return data;
-			}
+			// Ensure valid user credentials are being sent.
+			boolean validUserCredentials = this._validateUserCredentials(userID, password);
+			if (validUserCredentials == true) {
+				data.put(userID, validUserCredentials + "");
 
-			// Hash the incoming password, and check to see it matches the hash in the DB.
-			String incomingHash = this._hash(password);
-			if ((service.getUserByUsername(userID).getPasswordHash() + "").equals(incomingHash + "")) {
-				data.put("Response", 200 + "");
-				username = userID;
+
+				username = userID; // REFACTOR AND REMOVE ME TODO REMOVE
+
+
+				return data;
+			} else {
+				data.put("Login Status", false + "");
 				return data;
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			System.err.println("Login failed");
-			data.put("Response", 401 + "");
+			data.put("Login Status", false + "");
 			return data;
 		}
-		return data;
+	}
+
+	/**
+	 * Check if there is a user with the incoming ID, along with a password. Hash
+	 * the incoming password, and check to see it matches the hash in the DB.
+	 * 
+	 * @param User ID, User Password
+	 * @return boolean of the acceptance status of the user credentials.
+	 */
+	private boolean _validateUserCredentials(String userID, String userPassword) throws NoSuchAlgorithmException {
+		boolean credsAreValid = false;
+		if (service.getUserByUsername(userID) != null && service.getUserByUsername(userID).getPasswordHash() != null) {
+			String incomingHash = this._hash(userPassword);
+			if ((service.getUserByUsername(userID).getPasswordHash() + "").equals(incomingHash + "")) {
+				credsAreValid = true;
+			}
+		}
+		return credsAreValid;
+	}
+
+		/**
+	 * Check if there is a user with the incoming ID, along with a password. Hash
+	 * the incoming password, and check to see it matches the hash in the DB.
+	 * 
+	 * @param User ID, User Password
+	 * @return boolean of the acceptance status of the user credentials.
+	 */
+	private boolean _validateUser(String userID) throws NoSuchAlgorithmException {
+		boolean credsAreValid = false;
+		if (service.getUserByUsername(userID) != null && service.getUserByUsername(userID).getPasswordHash() != null) {
+				credsAreValid = true;
+		}
+		return credsAreValid;
+	}
+
+	private boolean _ensureMasterKeyEstablished() throws NoSuchAlgorithmException {
+		boolean masterKeyStatus = false;
+		if (service.getMasterKey() == null) {
+			String hashForMasterKey = _hash("masterKeyPassword"); // TODO put in own method
+			service.setMasterKey(hashForMasterKey);
+			masterKeyStatus = true;
+		}
+		return masterKeyStatus;
 	}
 
 	/**
@@ -304,58 +351,65 @@ public class CryptoController {
 	@CrossOrigin
 	@GetMapping("/generateKeyPair")
 	@ResponseBody
-	public Map<String, String> generateKeys(@RequestParam String keyPassword) throws Exception {
-		if (service.getMasterKey() == null) {
-			String hashForMasterKey = _hash("masterKeyPassword"); // TODO put in own method
-			service.setMasterKey(hashForMasterKey);
-		}
+	public Map<String, String> generateKeys(@RequestParam String userID,
+			@RequestParam String keyPassword) throws Exception {
+
+		// Ensure the vHSM database has an active working secret key. Set secret key once per instance.
+		// can use KEK to secure the master key with a password.
+		_ensureMasterKeyEstablished();
+
 		// Initialize return map and base64 encoder
 		HashMap<String, String> data = new HashMap<>();
 		Base64.Encoder encoder = Base64.getEncoder();
 
-		// Generate a key pair.
-		try {
-			KeyPair kp = _generateKeyPair(keyPassword);
-			PublicKey pub = kp.getPublic();
-			PrivateKey pvt = kp.getPrivate();
+		if (_validateUser(userID)) {
 
-			TEMPPUBKEY = pub;
+			System.out.println(userID);
 
-			// Public key.
-			String pubKey_64 = encoder.encodeToString(pub.getEncoded());
-			data.put("key", pubKey_64);
-
-			// Private Key.
-			String privKey_64 = encoder.encodeToString(pvt.getEncoded());
-
-			// Generate a keyID.
-			String keyID = calcKeyID(keyPassword);
-			data.put("keyID", keyID);
-
-			// Encrypt with AES256 the private key
-
-			// Associate user with a key, and persist to database.
-			service.createKey(username, keyID, privKey_64);
-
-			// Calculate Key Encryption Key (KEK)
-			// KEK = (HSMSecretKey) XOR (SHA256(KeyPassword))
-			String keyEncryptionKey = "";
+			// Generate a key pair.
 			try {
-				String sha256KeyPass = _hash(keyPassword);
-				keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
-				String pvtKey_encrypted = encrypt_AES(privKey_64, keyEncryptionKey);
-				service.createKey(username, keyID, pvtKey_encrypted);
+				KeyPair kp = _generateKeyPair(keyPassword);
+				PublicKey pub = kp.getPublic();
+				PrivateKey pvt = kp.getPrivate();
+
+				TEMPPUBKEY = pub;
+
+				// Public key.
+				String pubKey_64 = encoder.encodeToString(pub.getEncoded());
+				data.put("key", pubKey_64);
+
+				// Private Key.
+				String privKey_64 = encoder.encodeToString(pvt.getEncoded());
+
+				// Generate a keyID.
+				String keyID = calcKeyID(keyPassword);
+				data.put("keyID", keyID);
+
+				// Encrypt with AES256 the private key
+
+				// Associate user with a key, and persist to database.
+				service.createKey(userID, keyID, privKey_64);
+
+				// Calculate Key Encryption Key (KEK)
+				// KEK = (HSMSecretKey) XOR (SHA256(KeyPassword))
+				String keyEncryptionKey = "";
+				try {
+					String sha256KeyPass = _hash(keyPassword);
+					keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
+					String pvtKey_encrypted = encrypt_AES(privKey_64, keyEncryptionKey);
+					service.createKey(userID, keyID, pvtKey_encrypted);
+				} catch (Exception e) {
+					e.printStackTrace(System.err);
+				}
+				data.put(keyID, pubKey_64); // still need to store this in the user, send it to them on reg
+
+				// Calculate Key Verification Code (KVC)
+				String plaintext = KVC_PASSPHRASE;
+				String kekVerificationCode = encrypt_AES(plaintext, keyEncryptionKey); // store this, use it.
+
 			} catch (Exception e) {
-				e.printStackTrace(System.err);
+				data.put("Response", 500 + "");
 			}
-			data.put(keyID, pubKey_64); // still need to store this in the user, send it to them on reg
-
-			// Calculate Key Verification Code (KVC)
-			String plaintext = KVC_PASSPHRASE;
-			String kekVerificationCode = encrypt_AES(plaintext, keyEncryptionKey); // store this, use it.
-
-		} catch (Exception e) {
-			data.put("Response", 500 + "");
 		}
 		return data;
 	}

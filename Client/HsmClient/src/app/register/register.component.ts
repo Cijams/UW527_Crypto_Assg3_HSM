@@ -21,7 +21,7 @@ export class RegisterComponent implements OnInit {
     private formBuilder: FormBuilder,
     private http: HttpClient,
     private apiService: ApiService,
-    private _snackBar: MatSnackBar,
+    private snackBar: MatSnackBar,
     private route: Router,
 
   ) {
@@ -44,17 +44,26 @@ export class RegisterComponent implements OnInit {
       },
     ).subscribe(
       res => {
+        const registrationStatus = Object.values(res)[0];
+        const incomingUserID = Object.keys(res)[0].toString();
 
-        const returnKeys = Object.keys(res);
+        if (registrationStatus) {
+          this.apiService.setRegisteredUser(incomingUserID);
+        } else {
+          console.log('Failed to register user');
+        }
+
+        // const returnKeys = Object.keys(res);
         const returnValues = Object.values(res);
-        console.log(returnKeys);
-        console.log(returnValues);
+        // console.log(returnKeys);
+        // console.log(returnValues);
 
         if (!!returnValues[0]) {
           this.route.navigate(['/login']);
         } else {
           this.isHidden = false;
         }
+        console.log(this.apiService.getRegisteredUser());
       },
     );
   }

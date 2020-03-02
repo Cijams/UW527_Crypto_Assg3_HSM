@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { ApiService } from 'src/app/api.service';
 
 
 @Component({
@@ -17,6 +18,7 @@ export class HsmLoginComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private http: HttpClient,
+    private apiService: ApiService,
     private route: Router
   ) {
     this.location = location;
@@ -38,10 +40,14 @@ export class HsmLoginComponent implements OnInit {
       },
     ).subscribe(
       (res: Response) => {
-        if (Object.values(res)[0] + '' === '200') {
-          console.log('auth');
+        const registrationStatus = Object.values(res)[0];
+        const incomingUserID = Object.keys(res)[0].toString();
+
+        if (registrationStatus === 'true') {
+          this.apiService.setRegisteredUser(incomingUserID);
           this.route.navigate(['/crypto']);
         } else {
+          console.log('Failed to register user');
           this.isHidden = false;
         }
       },

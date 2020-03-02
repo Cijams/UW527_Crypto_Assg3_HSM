@@ -18,7 +18,8 @@ export class CryptoComponent implements OnInit {
   eKeyID = '';
 
   constructor(private http: HttpClient,
-              private formBuilder: FormBuilder) { }
+              private formBuilder: FormBuilder,
+              private apiService: ApiService) { }
 
   ngOnInit(): void {
     this.keyForm = this.formBuilder.group({
@@ -41,6 +42,7 @@ export class CryptoComponent implements OnInit {
     this.http.get(url,
       {
         params: new HttpParams().set('keyPassword', this.keyForm.get('keyPassword').value)
+        .append('userID', this.apiService.getRegisteredUser())
       },
     ).subscribe(
       (res: Response) => {
@@ -84,8 +86,8 @@ export class CryptoComponent implements OnInit {
     this.http.get(url,
       {
         params: new HttpParams().set('text', testText)
-        .append('eKeyID', this.eKeyID)
-        .append('keyPassword', testKeyPassword)
+          .append('eKeyID', this.eKeyID)
+          .append('keyPassword', testKeyPassword)
       },
     ).subscribe(
       (res: Response) => {
@@ -135,8 +137,8 @@ export class CryptoComponent implements OnInit {
     this.http.get(url,
       {
         params: new HttpParams().set('text', testText)
-        .append('eKeyID', this.eKeyID)
-        .append('keyPassword', testKeyPassword)
+          .append('eKeyID', this.eKeyID)
+          .append('keyPassword', testKeyPassword)
       },
     ).subscribe(
       (res: Response) => {
@@ -155,8 +157,8 @@ export class CryptoComponent implements OnInit {
     this.http.get(url,
       {
         params: new HttpParams().set('text', testText)
-        .append('eKeyID', this.eKeyID)
-        .append('keyPassword', testKeyPassword)
+          .append('eKeyID', this.eKeyID)
+          .append('keyPassword', testKeyPassword)
       },
     ).subscribe(
       (res: Response) => {

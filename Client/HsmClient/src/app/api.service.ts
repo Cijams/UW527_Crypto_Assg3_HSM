@@ -9,14 +9,14 @@ const localUrl = 'http://localhost:8080/hello-world';
 export class ApiService {
   registeredUser;
 
-  constructor(private http: HttpClient) { }
+  constructor() { }
 
   getRegisteredUser() {
-
+    return this.registeredUser;
   }
 
-  setRegisteredUser() {
-
+  setRegisteredUser(registeredUser: string) {
+    this.registeredUser = registeredUser;
   }
 
 }
