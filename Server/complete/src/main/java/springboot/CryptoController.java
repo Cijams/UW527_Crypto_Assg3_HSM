@@ -14,6 +14,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.KeyStore.PrivateKeyEntry;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RestController
 public class CryptoController {
 	private static final String KVC_PASSPHRASE = "test";
+	PublicKey TEMPPUBKEY;
 	static String username = "";
 	@Autowired
 	private PersistenceService service;
@@ -112,29 +114,36 @@ public class CryptoController {
 	 * 
 	 * @param Text, Key ID, Key Password
 	 * @return RSA(Text, Private Key from HSM DB)
+	 * @throws Exception
 	 */
 	@CrossOrigin
 	@GetMapping("/encrypt")
 	@ResponseBody
 	public Map<String, String> encrypt(@RequestParam String text, @RequestParam String eKeyID,
-			@RequestParam String keyPassword) throws NoSuchAlgorithmException {
+			@RequestParam String keyPassword) throws Exception {
 		HashMap<String, String> data = new HashMap<>();
 
 		System.out.println(text);
 		System.out.println(eKeyID);
 		System.out.println(keyPassword);
 
-		System.out.println(service.getKeyValueById(eKeyID));
+		String pvtKey = service.getKeyValueById(eKeyID);
 
-		String prtKey = service.getKeyValueById(eKeyID);
+		// System.out.println(service.getKeyValueById(eKeyID));
+		byte[] decodedKey = Base64.getDecoder().decode(pvtKey);
+
 		// Key privateKey = new Key();
 		// privateKey.setValue(service.getKeyValueById(eKeyID));
-//
-	//	PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedKey));
+		//
+		PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedKey));
 
-	//	String encryptedText = encrypt_RSA(text, Key);
+		String encryptedText = encrypt_RSA(text, privateKey);
+		String decryptedText = decrypt_RSA(encryptedText, TEMPPUBKEY);
 
-		data.put("Key", "Yes");
+		System.out.println(decryptedText + " HERE");
+
+		data.put("Encrypted:", encryptedText);
+		data.put("Decrypted:", decryptedText);
 		return data;
 	}
 
@@ -145,6 +154,15 @@ public class CryptoController {
 		byte[] cipherText = encryptCipher.doFinal(plainText.getBytes(UTF_8));
 
 		return Base64.getEncoder().encodeToString(cipherText);
+	}
+
+	public static String decrypt_RSA(String cipherText, PublicKey publicKey) throws Exception {
+		byte[] bytes = Base64.getDecoder().decode(cipherText);
+
+		Cipher decriptCipher = Cipher.getInstance("RSA");
+		decriptCipher.init(Cipher.DECRYPT_MODE, publicKey);
+
+		return new String(decriptCipher.doFinal(bytes), UTF_8);
 	}
 
 	/**
@@ -201,6 +219,19 @@ public class CryptoController {
 		user.setPasswordHash(hash);
 		service.createUser(user.getUserName(), user.getPasswordHash());
 		data.put(userID, true);
+		return data;
+
+	}
+
+	@CrossOrigin
+	@GetMapping("/sign")
+	@ResponseBody
+	public Map<String, Boolean> sign(@RequestParam String text, @RequestParam String keyID,
+			@RequestParam String keyPassword) throws NoSuchAlgorithmException {
+		HashMap<String, Boolean> data = new HashMap<>();
+
+	//	String signature = sign(text, privateKey);
+
 		return data;
 
 	}
@@ -271,6 +302,8 @@ public class CryptoController {
 			KeyPair kp = _generateKeyPair(keyPassword);
 			PublicKey pub = kp.getPublic();
 			PrivateKey pvt = kp.getPrivate();
+
+			TEMPPUBKEY = pub;
 
 			// Public key.
 			String pubKey_64 = encoder.encodeToString(pub.getEncoded());
