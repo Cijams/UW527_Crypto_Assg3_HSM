@@ -2,21 +2,32 @@
   <app-top-bar></app-top-bar>
 </div>
 
+<div style="min-width: 700px; padding-top: 1px; margin-top: 1px;">
 <!-- main content container -->
-<div class="jumbotron">
-    <div class="container">
-        <div class="row">
-            <div style="margin-left: 20px;" class="col-sm-8 offset-sm-2">
-                <router-outlet></router-outlet>
-            </div>
-        </div>
+<div style="float: left;" class="jumbotron">
+  <div class="container">
+    <div class="row">
+      <div style="margin-left: 20px;" class="col-sm-8 offset-sm-2">
+        <router-outlet></router-outlet>
+      </div>
     </div>
+  </div>
+</div>
+
+
+<div style="float: left;" class="jumbotron">
+
+      <div style="margin-left: 20px; margin-top: 20px; padding-top: 1px; padding-bottom: 1px;" class="col-sm-8 offset-sm-2">
+      <app-data></app-data>
+
+    </div>
+</div>
 </div>
 
 <div style="
   position: fixed;
   bottom: 0;
   width: 100%;
-"class="container">
+" class="container">
   <app-bot-bar></app-bot-bar>
 </div>

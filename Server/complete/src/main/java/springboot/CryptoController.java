@@ -46,7 +46,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class CryptoController {
 	private static final String KVC_PASSPHRASE = "test";
 	PublicKey TEMPPUBKEY;
-	static String username = "";
+
 	@Autowired
 	private PersistenceService service;
 
@@ -202,7 +202,8 @@ public class CryptoController {
 	public Map<String, Boolean> registerUser(@RequestParam String userID, @RequestParam String password)
 			throws NoSuchAlgorithmException {
 		HashMap<String, Boolean> data = new HashMap<>();
-		if (service.getUserByUsername(userID) != null) {
+		if (service.getUserByUsername(userID) != null ||
+			password.length() < 1) {
 			data.put(userID, false);
 			return data;
 		}
@@ -276,11 +277,6 @@ public class CryptoController {
 			boolean validUserCredentials = this._validateUserCredentials(userID, password);
 			if (validUserCredentials == true) {
 				data.put(userID, validUserCredentials + "");
-
-
-				username = userID; // REFACTOR AND REMOVE ME TODO REMOVE
-
-
 				return data;
 			} else {
 				data.put("Login Status", false + "");
@@ -312,7 +308,7 @@ public class CryptoController {
 		return credsAreValid;
 	}
 
-		/**
+	/**
 	 * Check if there is a user with the incoming ID, along with a password. Hash
 	 * the incoming password, and check to see it matches the hash in the DB.
 	 * 
@@ -322,7 +318,7 @@ public class CryptoController {
 	private boolean _validateUser(String userID) throws NoSuchAlgorithmException {
 		boolean credsAreValid = false;
 		if (service.getUserByUsername(userID) != null && service.getUserByUsername(userID).getPasswordHash() != null) {
-				credsAreValid = true;
+			credsAreValid = true;
 		}
 		return credsAreValid;
 	}
@@ -351,10 +347,11 @@ public class CryptoController {
 	@CrossOrigin
 	@GetMapping("/generateKeyPair")
 	@ResponseBody
-	public Map<String, String> generateKeys(@RequestParam String userID,
-			@RequestParam String keyPassword) throws Exception {
+	public Map<String, String> generateKeys(@RequestParam String userID, @RequestParam String keyPassword)
+			throws Exception {
 
-		// Ensure the vHSM database has an active working secret key. Set secret key once per instance.
+		// Ensure the vHSM database has an active working secret key. Set secret key
+		// once per instance.
 		// can use KEK to secure the master key with a password.
 		_ensureMasterKeyEstablished();
 
@@ -382,7 +379,7 @@ public class CryptoController {
 				String privKey_64 = encoder.encodeToString(pvt.getEncoded());
 
 				// Generate a keyID.
-				String keyID = calcKeyID(keyPassword);
+				String keyID = calcKeyID(keyPassword, userID);
 				data.put("keyID", keyID);
 
 				// Encrypt with AES256 the private key
@@ -421,14 +418,14 @@ public class CryptoController {
 		return pair;
 	}
 
-	private String calcKeyID(String keypass) {
+	private String calcKeyID(String keypass, String userID) {
 		String passHash = null;
 		try {
 			passHash = _hash(keypass);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		}
-		String keyID = username + "-" + passHash.substring(0, 7); // questionable... user needs to be logged in
+		String keyID = userID + "-" + passHash.substring(0, 7); // questionable... user needs to be logged in
 		return keyID;
 	}
 

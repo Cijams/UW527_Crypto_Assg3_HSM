@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ApiService } from 'src/app/api.service';
 
 @Component({
   selector: 'app-top-bar',
@@ -6,10 +7,16 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./top-bar.component.css']
 })
 export class TopBarComponent implements OnInit {
-
-  constructor() { }
+  loggedInUser;
+  constructor(private apiservice: ApiService) { }
 
   ngOnInit(): void {
+    this.subscribeToUserName();
+  }
+  subscribeToUserName() {
+    this.apiservice.displayUser.subscribe((userName) => {
+      this.loggedInUser = userName;
+    });
   }
 
 }

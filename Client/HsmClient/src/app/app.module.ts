@@ -21,6 +21,7 @@ import { CryptoComponent } from './crypto/crypto.component';
 import { HttpClientModule } from '@angular/common/http';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DataComponent } from './components/data/data.component';
 
 
 @NgModule({
@@ -33,6 +34,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     RegisterComponent,
     BotBarComponent,
     CryptoComponent,
+    DataComponent,
   ],
   imports: [
     BrowserAnimationsModule,

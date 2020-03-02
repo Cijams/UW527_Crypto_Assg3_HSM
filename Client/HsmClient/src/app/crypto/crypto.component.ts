@@ -49,11 +49,14 @@ export class CryptoComponent implements OnInit {
         if (Object.values(res)[0] + '' === '500') {
           console.log('Key failed to generate');
         } else {
+
           this.publicKey = Object.values(res)[0];
           this.eKeyID = Object.keys(res)[0];
           console.log(this.publicKey);
           console.log(this.eKeyID);
           console.log(res);
+
+          this._updateData(this.publicKey);
         }
       },
     );
@@ -62,16 +65,8 @@ export class CryptoComponent implements OnInit {
   /**
    *  Shows the public key for the user.
    */
-  public onDisaplayKeys() {
-    const url = 'http://localhost:8080/displayKeys';
-    this.http.get(url,
-      { responseType: 'text' }).subscribe(
-        res => {
-          this.text = res;
-          console.log(res);
-        },
-      );
-  }
+  private _updateData(data: string) {
+    this.apiService.updatedDataSelection(data);  }
 
   /**
    * Locates the private key corresponding to the provided Key ID. Returns the

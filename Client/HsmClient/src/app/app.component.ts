@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from './api.service';
-import { HttpClient } from '@angular/common/http';
+
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -10,10 +10,15 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AppComponent {
 
+  constructor(private router: Router) {}
+
   smartphone: any = [];
 
-  constructor(private api: ApiService, private http: HttpClient) {}
-
   title = 'HsmClient';
+
+  // tslint:disable-next-line: use-lifecycle-interface
+  ngOnInit() {
+    this.router.navigate(['']);
+  }
 
 }

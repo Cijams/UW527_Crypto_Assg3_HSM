@@ -1,6 +1,7 @@
-<div>
+<div class="container" style="width: 100%;">
   <a [routerLink]="['/']">
     <mat-icon id="homeBtn" aria-hidden="false" aria-label="Home">home</mat-icon>
   </a>
   <h1>Virtual Hardware Security Module</h1>
+  <h1 style="float: right;" *ngIf="loggedInUser"> Welcome,  {{ loggedInUser }}</h1>
 </div>

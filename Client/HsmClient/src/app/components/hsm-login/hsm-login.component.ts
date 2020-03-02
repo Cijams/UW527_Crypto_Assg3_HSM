@@ -52,6 +52,7 @@ export class HsmLoginComponent implements OnInit {
         }
       },
     );
+    this.apiService.updateDisplayedUser(this.loginForm.get('userID').value);
   }
 
 }
