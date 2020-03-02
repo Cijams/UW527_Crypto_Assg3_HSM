@@ -129,14 +129,40 @@ export class CryptoComponent implements OnInit {
    * Creates a digital signature from an established symmetric key.
    */
   public onSign() {
+    const testText = 'Encrypt Me';
+    const testKeyPassword = 'myPassword';
     const url = 'http://localhost:8080/sign';
     this.http.get(url,
-      { responseType: 'text' }).subscribe(
-        res => {
-          this.text = res;
-          console.log(res);
-        },
-      );
+      {
+        params: new HttpParams().set('text', testText)
+        .append('eKeyID', this.eKeyID)
+        .append('keyPassword', testKeyPassword)
+      },
+    ).subscribe(
+      (res: Response) => {
+        console.log(res);
+      },
+    );
+  }
+
+  /**
+   * Verifies the information from a digital signature.
+   */
+  public onVerify() {
+    const testText = 'Encrypt Me';
+    const testKeyPassword = 'myPassword';
+    const url = 'http://localhost:8080/verify';
+    this.http.get(url,
+      {
+        params: new HttpParams().set('text', testText)
+        .append('eKeyID', this.eKeyID)
+        .append('keyPassword', testKeyPassword)
+      },
+    ).subscribe(
+      (res: Response) => {
+        console.log(res);
+      },
+    );
   }
 
   /**

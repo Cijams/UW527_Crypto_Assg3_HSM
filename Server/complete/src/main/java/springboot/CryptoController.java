@@ -128,13 +128,7 @@ public class CryptoController {
 		System.out.println(keyPassword);
 
 		String pvtKey = service.getKeyValueById(eKeyID);
-
-		// System.out.println(service.getKeyValueById(eKeyID));
 		byte[] decodedKey = Base64.getDecoder().decode(pvtKey);
-
-		// Key privateKey = new Key();
-		// privateKey.setValue(service.getKeyValueById(eKeyID));
-		//
 		PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedKey));
 
 		String encryptedText = encrypt_RSA(text, privateKey);
@@ -226,14 +220,36 @@ public class CryptoController {
 	@CrossOrigin
 	@GetMapping("/sign")
 	@ResponseBody
-	public Map<String, Boolean> sign(@RequestParam String text, @RequestParam String keyID,
-			@RequestParam String keyPassword) throws NoSuchAlgorithmException {
+	public Map<String, String> sign(@RequestParam String text, @RequestParam String eKeyID,
+			@RequestParam String keyPassword) throws Exception {
+		HashMap<String, String> data = new HashMap<>();
+
+		String pvtKey = service.getKeyValueById(eKeyID);
+		byte[] decodedKey = Base64.getDecoder().decode(pvtKey);
+		PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedKey));
+
+		String signature = sign(text, privateKey);
+
+		data.put("Signature", signature);
+		return data;
+	}
+
+	@CrossOrigin
+	@GetMapping("/verify")
+	@ResponseBody
+	public Map<String, Boolean> verify(@RequestParam String text, @RequestParam String eKeyID,
+			@RequestParam String keyPassword) throws Exception {
 		HashMap<String, Boolean> data = new HashMap<>();
 
-	//	String signature = sign(text, privateKey);
+		String pvtKey = service.getKeyValueById(eKeyID);
+		byte[] decodedKey = Base64.getDecoder().decode(pvtKey);
+		PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedKey));
+		String signature = sign(text, privateKey);
 
+		boolean isCorrect = verify(text, signature, TEMPPUBKEY);
+
+		data.put("data is:", isCorrect)
 		return data;
-
 	}
 
 	// TODO: Add a salt to the hash, change to post request.
