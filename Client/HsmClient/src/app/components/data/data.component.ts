@@ -9,14 +9,25 @@ import { ApiService } from 'src/app/api.service';
 export class DataComponent implements OnInit {
 
   data;
-  displayData;
+  functionName;
 
   constructor(private apiService: ApiService) { }
 
   ngOnInit(): void {
-    this.data = this.apiService.data.subscribe((info) => {
-      this.displayData = info;
-    }) ;
+    this.subscribeToData();
+    this.subscribeToCalledFunction();
+  }
+
+  subscribeToData() {
+    this.apiService.data.subscribe((data) => {
+      this.data = data;
+    });
+  }
+
+  subscribeToCalledFunction() {
+    this.apiService.lastFunctionCalled.subscribe((functionName) => {
+      this.functionName = functionName;
+    });
   }
 
 }

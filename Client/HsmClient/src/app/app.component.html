@@ -2,26 +2,27 @@
   <app-top-bar></app-top-bar>
 </div>
 
-<div style="min-width: 700px; padding-top: 1px; margin-top: 1px;">
-<!-- main content container -->
-<div style="float: left;" class="jumbotron">
-  <div class="container">
-    <div class="row">
-      <div style="margin-left: 20px;" class="col-sm-8 offset-sm-2">
-        <router-outlet></router-outlet>
+<div style="min-width: 1000px; max-width: 1150px; padding-top: 1px; margin-top: 1px;">
+
+  <!-- main content container -->
+  <div style="float: left; width: 600px; height: 500px" class="jumbotron">
+    <div class="container">
+      <div class="row">
+        <div style="margin-left: 20px;" class="col-sm-8 offset-sm-2">
+          <router-outlet></router-outlet>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-
-<div style="float: left;" class="jumbotron">
-
-      <div style="margin-left: 20px; margin-top: 20px; padding-top: 1px; padding-bottom: 1px;" class="col-sm-8 offset-sm-2">
-      <app-data></app-data>
-
+  <span *ngIf="dataExists">
+    <div style="float: right; width: 500px; height: 500px; padding-top: 27px;" class="jumbotron">
+      <div style="margin-left: 20px; margin-top: 20px; padding-top: 1px; padding-bottom: 1px;"
+        class="col-sm-8 offset-sm-2">
+        <app-data></app-data>
+      </div>
     </div>
-</div>
+  </span>
 </div>
 
 <div style="

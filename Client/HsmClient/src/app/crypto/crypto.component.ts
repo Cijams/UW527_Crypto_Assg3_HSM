@@ -18,8 +18,8 @@ export class CryptoComponent implements OnInit {
   eKeyID = '';
 
   constructor(private http: HttpClient,
-              private formBuilder: FormBuilder,
-              private apiService: ApiService) { }
+    private formBuilder: FormBuilder,
+    private apiService: ApiService) { }
 
   ngOnInit(): void {
     this.keyForm = this.formBuilder.group({
@@ -42,7 +42,7 @@ export class CryptoComponent implements OnInit {
     this.http.get(url,
       {
         params: new HttpParams().set('keyPassword', this.keyForm.get('keyPassword').value)
-        .append('userID', this.apiService.getRegisteredUser())
+          .append('userID', this.apiService.getRegisteredUser())
       },
     ).subscribe(
       (res: Response) => {
@@ -57,6 +57,8 @@ export class CryptoComponent implements OnInit {
           console.log(res);
 
           this._updateData(this.publicKey);
+          this._updateFunction('Public Key:');
+          this._updateDisplayedData('yep');
         }
       },
     );
@@ -66,7 +68,16 @@ export class CryptoComponent implements OnInit {
    *  Shows the public key for the user.
    */
   private _updateData(data: string) {
-    this.apiService.updatedDataSelection(data);  }
+    this.apiService.updatedDataSelection(data);
+  }
+
+  private _updateFunction(data: string) {
+    this.apiService.updateLastFunctionCalled(data);
+  }
+
+  private _updateDisplayedData(data: string) {
+    this.apiService.updateDisplayedData(data);
+  }
 
   /**
    * Locates the private key corresponding to the provided Key ID. Returns the
