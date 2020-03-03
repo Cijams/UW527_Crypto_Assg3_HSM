@@ -14,8 +14,11 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.KeyStore.PrivateKeyEntry;
+import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
@@ -123,21 +126,10 @@ public class CryptoController {
 			@RequestParam String keyPassword) throws Exception {
 		HashMap<String, String> data = new HashMap<>();
 
-		System.out.println(text);
-		System.out.println(eKeyID);
-		System.out.println(keyPassword);
+		Base64.Decoder decoder = Base64.getDecoder();
+		
 
-		String pvtKey = service.getKeyValueById(eKeyID);
-		byte[] decodedKey = Base64.getDecoder().decode(pvtKey);
-		PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedKey));
 
-		String encryptedText = encrypt_RSA(text, privateKey);
-		String decryptedText = decrypt_RSA(encryptedText, TEMPPUBKEY);
-
-		System.out.println(decryptedText + " HERE");
-
-		data.put("Encrypted:", encryptedText);
-		data.put("Decrypted:", decryptedText);
 		return data;
 	}
 
@@ -202,8 +194,7 @@ public class CryptoController {
 	public Map<String, Boolean> registerUser(@RequestParam String userID, @RequestParam String password)
 			throws NoSuchAlgorithmException {
 		HashMap<String, Boolean> data = new HashMap<>();
-		if (service.getUserByUsername(userID) != null ||
-			password.length() < 1) {
+		if (service.getUserByUsername(userID) != null || password.length() < 1) {
 			data.put(userID, false);
 			return data;
 		}
@@ -358,11 +349,8 @@ public class CryptoController {
 		// Initialize return map and base64 encoder
 		HashMap<String, String> data = new HashMap<>();
 		Base64.Encoder encoder = Base64.getEncoder();
-
+		Base64.Decoder decoder = Base64.getDecoder();
 		if (_validateUser(userID)) {
-
-			System.out.println(userID);
-
 			// Generate a key pair.
 			try {
 				KeyPair kp = _generateKeyPair(keyPassword);
@@ -372,39 +360,65 @@ public class CryptoController {
 				TEMPPUBKEY = pub;
 
 				// Public key.
-				String pubKey_64 = encoder.encodeToString(pub.getEncoded());
-				data.put("key", pubKey_64);
+				String pubKey_64 = new String(pub.getEncoded()+""); // jere
 
 				// Private Key.
 				String privKey_64 = encoder.encodeToString(pvt.getEncoded());
 
+				// String privateKeyBytes = new String(pvt.getEncoded());
+
+				// String test = encrypt_RSA("hello", pvt);
+				// System.out.println(test);
+				// System.out.println("__");
+				// String test2 = decrypt_RSA(test, pub);
+				// System.out.println(test2);
+
 				// Generate a keyID.
 				String keyID = calcKeyID(keyPassword, userID);
-				data.put("keyID", keyID);
 
 				// Encrypt with AES256 the private key
-
-				// Associate user with a key, and persist to database.
-				service.createKey(userID, keyID, privKey_64);
 
 				// Calculate Key Encryption Key (KEK)
 				// KEK = (HSMSecretKey) XOR (SHA256(KeyPassword))
 				String keyEncryptionKey = "";
+				String pvtKey_encrypted = "";
 				try {
 					String sha256KeyPass = _hash(keyPassword);
 					keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
-					String pvtKey_encrypted = encrypt_AES(privKey_64, keyEncryptionKey);
+					pvtKey_encrypted = encrypt_AES(privKey_64, keyEncryptionKey);
 					service.createKey(userID, keyID, pvtKey_encrypted);
 				} catch (Exception e) {
 					e.printStackTrace(System.err);
 				}
 				data.put(keyID, pubKey_64); // still need to store this in the user, send it to them on reg
 
-				// Calculate Key Verification Code (KVC)
-				String plaintext = KVC_PASSPHRASE;
-				String kekVerificationCode = encrypt_AES(plaintext, keyEncryptionKey); // store this, use it.
+				System.out.println();
+				service.getKeyValueById(keyID);
 
+				System.out.println(privKey_64.equals(decrypt_AES(pvtKey_encrypted, keyEncryptionKey)));
+				
+				String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey);
+
+				KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+				EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoder.decode(unencryptedPrivateKey));
+				PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
+
+				// EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(pubKey_64.getBytes());
+				// PublicKey publicKey2 = keyFactory.generatePublic(publicKeySpec);
+
+
+				// System.out.println("*************************************");
+				 String encrytpedText = encrypt_RSA("hello", privateKey2);
+				 System.out.println(encrytpedText);
+				// System.out.println("***************************************");
+
+
+
+			//	String plaintext = KVC_PASSPHRASE;
+			//	String kekVerificationCode = encrypt_AES(plaintext, keyEncryptionKey); // store this, use it.
 			} catch (Exception e) {
+				e.printStackTrace();
 				data.put("Response", 500 + "");
 			}
 		}
