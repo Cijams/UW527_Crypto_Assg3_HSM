@@ -371,7 +371,7 @@ public class CryptoController {
 				TEMPPUBKEY = pub;
 
 				// Public key.
-				String pubKey_64 = new String(pub.getEncoded() + ""); // jere
+				String pubKey_64 =  encoder.encodeToString(pub.getEncoded());; // jere
 
 				// Private Key.
 				String privKey_64 = encoder.encodeToString(pvt.getEncoded());
