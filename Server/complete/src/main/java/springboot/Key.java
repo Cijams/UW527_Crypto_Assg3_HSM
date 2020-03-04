@@ -70,7 +70,17 @@ public class Key {
 		
 	@Override
 	public String toString() {
-		return "keyId = " + keyId + " : Value = " + value.substring( 1,  8 ) + "...";
+		
+		// truncate value if necessary
+		String truncValue;
+		if ( value != null) {
+			truncValue =  ( value.length() > 7 ) ? value.substring( 0,  8 )  : value;
+		} else {
+			truncValue = "[NULL]";
+		}
+		
+		return "keyId = " + keyId + " : Value = " + truncValue;
+
 	}
 	
 }
