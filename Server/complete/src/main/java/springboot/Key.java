@@ -70,7 +70,7 @@ public class Key {
 		
 	@Override
 	public String toString() {
-		return "keyId = " + keyId + " : Value = " + value;
+		return "keyId = " + keyId + " : Value = " + value.substring( 1,  8 ) + "...";
 	}
 	
 }
