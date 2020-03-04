@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiService } from '../api.service';
-import { MatInputModule } from '@angular/material/input';
-import { Router } from '@angular/router';
 import { FormGroup } from '@angular/forms';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
+import { ThrowStmt } from '@angular/compiler';
 
 @Component({
   selector: 'app-crypto',
@@ -13,9 +12,15 @@ import { FormBuilder, Validators } from '@angular/forms';
 })
 export class CryptoComponent implements OnInit {
   keyForm: FormGroup;
+  encryptForm: FormGroup;
+  decryptForm: FormGroup;
+  hashForm: FormGroup;
+  signForm: FormGroup;
+
   text; // Testing text for ensuring calls work REMOVE ME
   publicKey = 'Key goes here';
   eKeyID = '';
+  keyPass = '';
 
   constructor(private http: HttpClient,
               private formBuilder: FormBuilder,
@@ -24,6 +29,18 @@ export class CryptoComponent implements OnInit {
   ngOnInit(): void {
     this.keyForm = this.formBuilder.group({
       keyPassword: [''],
+    });
+    this.encryptForm = this.formBuilder.group({
+      textToEncrypt: [''],
+    });
+    this.decryptForm = this.formBuilder.group({
+      textToDecrypt: [''],
+    });
+    this.hashForm = this.formBuilder.group({
+      textToHash: [''],
+    });
+    this.signForm = this.formBuilder.group({
+      textToSign: [''],
     });
   }
 
@@ -39,6 +56,7 @@ export class CryptoComponent implements OnInit {
    */
   public onGenerateKeys() {
     const url = 'http://localhost:8080/generateKeyPair';
+    this.keyPass = this.keyForm.get('keyPassword').value;
     this.http.get(url,
       {
         params: new HttpParams().set('keyPassword', this.keyForm.get('keyPassword').value)
@@ -50,11 +68,8 @@ export class CryptoComponent implements OnInit {
           console.log('Key failed to generate');
         } else {
 
-          this.publicKey = Object.values(res)[0];
+          this.publicKey = Object.values(res)[0]; // TODO Store on db.
           this.eKeyID = Object.keys(res)[0];
-          console.log(this.publicKey);
-          console.log(this.eKeyID);
-          console.log(res);
 
           this._updateData(this.publicKey);
           this._updateFunction('Public Key:');
@@ -86,14 +101,12 @@ export class CryptoComponent implements OnInit {
    * @returns RSA(Text, Private Key from HSM DB)
    */
   public onEncrypt() {
-    const testText = 'Encrypt Me';
-
     const url = 'http://localhost:8080/encrypt';
     this.http.get(url,
       {
-        params: new HttpParams().set('text', testText)
+        params: new HttpParams().set('text', this.encryptForm.get('textToEncrypt').value)
           .append('eKeyID', this.eKeyID)
-          .append('keyPassword', this.keyForm.get('keyPassword').value)
+          .append('keyPassword', this.keyPass)
       },
     ).subscribe(
       (res: Response) => {
@@ -108,19 +121,29 @@ export class CryptoComponent implements OnInit {
     );
   }
 
-
   /**
-   * Decrypts given textfield with inverse of previously used encryption.
+   *  FIll me in
    */
   public onDecrypt() {
+    const cipherText = this.apiService.getData();
     const url = 'http://localhost:8080/decrypt';
     this.http.get(url,
-      { responseType: 'text' }).subscribe(
-        res => {
-          this.text = res;
-          console.log(res);
-        },
-      );
+      {
+        params: new HttpParams().set('publicKey', this.publicKey)
+          .append('keyPassword', this.keyPass)
+          .append('cipherText', cipherText)
+      },
+    ).subscribe(
+      (res: Response) => {
+        console.log(res);
+        // this.publicKey = Object.values(res)[0];
+        // this.eKeyID = Object.keys(res)[0];
+
+        this._updateData(Object.values(res)[0]);
+        this._updateFunction('Encrypted Text:');
+        this._updateDisplayedData('Affirmative');
+      },
+    );
   }
 
   /**
@@ -196,7 +219,11 @@ export class CryptoComponent implements OnInit {
           print += (`${key}: ${value}` + ' | ');
         }
         console.log(res);
-        this.publicKey = print;
+        //this.publicKey = print;
+
+        this._updateData(print);
+        this._updateFunction('Report:');
+        this._updateDisplayedData('Affirmative');
       },
     );
   }

@@ -120,6 +120,49 @@ public class CryptoController {
 	 * @throws Exception
 	 */
 	@CrossOrigin
+	@GetMapping("/decrypt")
+	@ResponseBody
+	public Map<String, String> decrypt(@RequestParam String publicKey, @RequestParam String keyPassword,
+			@RequestParam String cipherText) throws Exception {
+		HashMap<String, String> data = new HashMap<>();
+		Base64.Decoder decoder = Base64.getDecoder();
+
+		// System.out.println(publicKey);
+		// System.out.println("\n");
+		// System.out.println(keyPassword);
+		// System.out.println("\n");
+		// System.out.println(cipherText);
+
+				System.out.println(publicKey);
+
+		// String sha256KeyPass = _hash(keyPassword);
+		// String keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "",
+		// sha256KeyPass);
+
+		// // String pvtKey_encrypted = service.getKeyValueById(eKeyID);
+
+		// // String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted,
+		// keyEncryptionKey); // here
+
+	//	KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+		//EncodedKeySpec publicKeySpec = new PKCS8EncodedKeySpec(decoder.decode(publicKey));
+		//PublicKey publicKey2 = keyFactory.generatePublic(publicKeySpec);
+		//String decryptedText = decrypt_RSA("hello", publicKey2);
+		// System.out.println("ANSWER IS:");
+		// System.out.println(encrytpedText);
+		// data.put("Encrypted:", encrytpedText);
+		return data;
+	}
+
+	/**
+	 * Locates the private key corresponding to the provided Key ID. Returns the
+	 * encryption of the provided text.
+	 * 
+	 * @param Text, Key ID, Key Password
+	 * @return RSA(Text, Private Key from HSM DB)
+	 * @throws Exception
+	 */
+	@CrossOrigin
 	@GetMapping("/encrypt")
 	@ResponseBody
 	public Map<String, String> encrypt(@RequestParam String text, @RequestParam String eKeyID,
@@ -184,7 +227,7 @@ public class CryptoController {
 			if (keys != null && !keys.isEmpty()) {
 				addedKey = aUser.getKeys().toString();
 			}
-			reportData.put(aUser + "", addedKey);
+			reportData.put(("User: " + aUser + ""), (addedKey.substring(0, 20) + "..."));
 		}
 
 		System.out.println(reportData.toString());
@@ -371,24 +414,15 @@ public class CryptoController {
 				TEMPPUBKEY = pub;
 
 				// Public key.
-				String pubKey_64 =  encoder.encodeToString(pub.getEncoded());; // jere
+				String pubKey_64 = encoder.encodeToString(pub.getEncoded());
 
 				// Private Key.
 				String privKey_64 = encoder.encodeToString(pvt.getEncoded());
-
-				// String privateKeyBytes = new String(pvt.getEncoded());
-
-				// String test = encrypt_RSA("hello", pvt);
-				// System.out.println(test);
-				// System.out.println("__");
-				// String test2 = decrypt_RSA(test, pub);
-				// System.out.println(test2);
 
 				// Generate a keyID.
 				String keyID = calcKeyID(keyPassword, userID);
 
 				// Encrypt with AES256 the private key
-
 				// Calculate Key Encryption Key (KEK)
 				// KEK = (HSMSecretKey) XOR (SHA256(KeyPassword))
 				String keyEncryptionKey = "";
@@ -404,11 +438,8 @@ public class CryptoController {
 				}
 				data.put(keyID, pubKey_64); // still need to store this in the user, send it to them on reg
 
-				// System.out.println(service.getKeyValueById(keyID).equals(pvtKey_encrypted));
 
-				pvtKey_encrypted = service.getKeyValueById(keyID); // here
-				// System.out.println(privKey_64.equals(decrypt_AES(pvtKey_encrypted,
-				// keyEncryptionKey)));
+				pvtKey_encrypted = service.getKeyValueById(keyID);
 
 				String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey);
 
@@ -418,7 +449,15 @@ public class CryptoController {
 				PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
 
 				String encrytpedText = encrypt_RSA("hello", privateKey2);
-				System.out.println(encrytpedText);
+				//System.out.println(encrytpedText);
+
+
+				System.out.println(pubKey_64);
+				EncodedKeySpec publicKeySpec = new PKCS8EncodedKeySpec(decoder.decode(pubKey_64));
+
+
+
+
 
 			} catch (Exception e) {
 				e.printStackTrace();

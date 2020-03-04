@@ -34,9 +34,9 @@
 }
 
 #loginBox {
-    padding-left: 60px;
+    padding-left: 20px;
     padding-bottom: 20px;
-    padding-right: 40%;
+    padding-right: 20px;
     min-width: 600px;
     border-style: solid;
     border-radius: 15px;
@@ -46,6 +46,7 @@
     border-top: 0px;
     border-color: #505050;
     overflow: hidden;
+    min-height: 350px;
 }
 
 .encryptField {

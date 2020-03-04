@@ -46,6 +46,8 @@
     border-top: 0px;
     border-color: #505050;
     overflow: hidden;
+    background-color: #F0F0F0;
+    min-height: 350px;
 }
 
 .encryptField {
@@ -57,6 +59,7 @@
     border-width: 2px;
     border-color: black;
     border-radius: 5px;
+    border-color: #505050;
 }
 
 h1 {

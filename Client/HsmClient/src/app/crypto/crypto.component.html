@@ -5,52 +5,61 @@
     <div id="loginBox">
         <h1>Cryptography Operations</h1>
 
-        <!-- Button to initiate generation of public-private key pair. -->
-        <div class="form-group" [formGroup]="keyForm">
-            <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
-                (click)="onGenerateKeys()">Generate Keys</button>
-            <input type="text" formControlName="keyPassword" placeholder="Key Password">
-        </div>
-        <div class="form-group" style="margin-left: 10px;">
-            
-            <!-- Buttons -->
-            <!-- <div style="padding-bottom: 15px;">
-                <button id="btn" style="color:white !important; width: 125px;" mat-raised-button
-                    (click)="onDisaplayKeys()">Display Keys</button>
-            </div> -->
+        <mat-tab-group>
+            <!-- Start of tab -->
+            <mat-tab label="Keys and Encryption">
 
-            <div style="float: left;">
-                <div>
-                    <button id="btn" style="color:white !important; width: 100px; margin-top: 20px;" mat-raised-button
+                <!-- Button to initiate generation of public-private key pair. -->
+                <div style="padding-top: 10px;" class="form-group" [formGroup]="keyForm">
+                    <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
+                        (click)="onGenerateKeys()">Generate Keys</button>
+                    <input type="text" formControlName="keyPassword" placeholder="Key Password">
+                </div>
+
+                <div class="form-group" [formGroup]="encryptForm">
+                    <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
                         (click)="onEncrypt()">Encrypt</button>
+                    <input type="text" formControlName="textToEncrypt" placeholder="Encrypt">
                 </div>
 
-                <div>
-                    <button id="btn" style="color:white !important; width: 100px;" mat-raised-button
-                        (click)="onDecrypt()">Decrypt</button>
+                <div class="form-group" [formGroup]="decryptForm">
+                    <div style="float: left;">
+                        <div>
+                            <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
+                                (click)="onDecrypt()">Decrypt</button>
+                            <input type="text" formControlName="textToDecrypt" placeholder="Decrypt">
+                        </div>
+                    </div>
                 </div>
+                <!-- End of Tab -->
+            </mat-tab>
 
-                <div>
-                    <button id="btn" style="color:white !important; width: 100px;" mat-raised-button
-                        (click)="onHash()">Hash</button>
-                </div>
+            <mat-tab style="overflow: hidden;" label="Hash, Sign and Reports">
+                <div style="padding-top: 10px; overflow:hidden;" class="form-group">
 
-                <div>
-                    <button id="btn" style="color:white !important; width: 100px;" mat-raised-button
-                        (click)="onSign()">Sign</button>
-                </div>
 
-                <div>
-                    <button id="btn" style="color:white !important; width: 100px;" mat-raised-button
-                        (click)="onGenReport()">GenReport</button>
+                    <div style="padding-top: 10px;" class="form-group" [formGroup]="hashForm">
+                        <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
+                            (click)="onHash()">Hash</button>
+                        <input type="text" formControlName="textToHash" placeholder="Hash">
+                    </div>
+
+                    <div class="form-group" [formGroup]="signForm">
+                        <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
+                            (click)="onSign()">Sign</button>
+                        <input type="text" formControlName="textToSign" placeholder="Sign">
+                    </div>
+
+                    <div>
+                        <button id="btn" style="color:white !important; width: 125px;" mat-raised-button
+                            (click)="onGenReport()">GenReport</button>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <!-- <form>
-            <mat-form-field>
-                <textarea matInput class="encryptField" placeholder="Text to encrypt..."></textarea>
-            </mat-form-field>
-        </form> -->
+            </mat-tab>
+
+        </mat-tab-group>
     </div>
+
+
 
 </div>

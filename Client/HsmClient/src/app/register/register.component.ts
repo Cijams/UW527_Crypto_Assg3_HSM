@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { HttpParams, HttpClient } from '@angular/common/http';
 import { ApiService } from '../api.service';
-import { ActivatedRoute, Router, } from '@angular/router';
-import { Route } from '@angular/compiler/src/core';
+import { Router, } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
@@ -59,13 +58,21 @@ export class RegisterComponent implements OnInit {
         // console.log(returnValues);
 
         if (!!returnValues[0]) {
+          this.openSnackBar('Registration Successful, Please log in.', 'OK');
           this.route.navigate(['/login']);
+
         } else {
           this.isHidden = false;
         }
-        console.log(this.apiService.getRegisteredUser());
       },
     );
   }
 
+  openSnackBar(message: string, action: string) {
+    this.snackBar.open(message, action, {
+      duration: 2500,
+      verticalPosition: 'top',
+      horizontalPosition: 'right',
+    });
+  }
 }

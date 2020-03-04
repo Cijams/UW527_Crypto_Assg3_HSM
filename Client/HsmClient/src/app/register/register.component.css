@@ -49,3 +49,8 @@
 h1 {
     color: black;
 }
+
+.red-snackbar{
+    background-color: rgb(153, 50, 50);
+    color:lightgoldenrodyellow;
+  }

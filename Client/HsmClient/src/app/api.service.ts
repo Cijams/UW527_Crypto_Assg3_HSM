@@ -45,6 +45,10 @@ export class ApiService {
     this.dataSource.next(data);
   }
 
+  getData() {
+    return this.dataSource.getValue();
+  }
+
   getRegisteredUser() {
     return this.registeredUser;
   }

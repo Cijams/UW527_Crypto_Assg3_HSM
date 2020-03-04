@@ -7,12 +7,12 @@ import { HsmLoginComponent } from './components/hsm-login/hsm-login.component';
 import { RouterModule } from '@angular/router';
 import { TopBarComponent } from './components/top-bar/top-bar.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatIconModule} from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {MatCardModule} from '@angular/material/card';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatButtonModule} from '@angular/material/button';
-import {MatFormFieldModule} from '@angular/material/form-field';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
@@ -22,6 +22,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DataComponent } from './components/data/data.component';
+import { MatTabsModule } from '@angular/material/tabs';
 
 
 @NgModule({
@@ -37,6 +38,7 @@ import { DataComponent } from './components/data/data.component';
     DataComponent,
   ],
   imports: [
+    MatTabsModule,
     BrowserAnimationsModule,
     MatIconModule,
     BrowserModule,
