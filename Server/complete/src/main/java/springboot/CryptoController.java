@@ -125,11 +125,22 @@ public class CryptoController {
 	public Map<String, String> encrypt(@RequestParam String text, @RequestParam String eKeyID,
 			@RequestParam String keyPassword) throws Exception {
 		HashMap<String, String> data = new HashMap<>();
-
 		Base64.Decoder decoder = Base64.getDecoder();
-		
 
+		String sha256KeyPass = _hash(keyPassword);
 
+		String keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
+
+		String pvtKey_encrypted = service.getKeyValueById(eKeyID);
+
+		String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey); // here
+
+		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+		EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoder.decode(unencryptedPrivateKey));
+		PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
+		String encrytpedText = encrypt_RSA("hello", privateKey2);
+
+		data.put("Encrypted:", encrytpedText);
 		return data;
 	}
 
@@ -360,7 +371,7 @@ public class CryptoController {
 				TEMPPUBKEY = pub;
 
 				// Public key.
-				String pubKey_64 = new String(pub.getEncoded()+""); // jere
+				String pubKey_64 = new String(pub.getEncoded() + ""); // jere
 
 				// Private Key.
 				String privKey_64 = encoder.encodeToString(pvt.getEncoded());
@@ -382,8 +393,9 @@ public class CryptoController {
 				// KEK = (HSMSecretKey) XOR (SHA256(KeyPassword))
 				String keyEncryptionKey = "";
 				String pvtKey_encrypted = "";
+				String sha256KeyPass = "";
 				try {
-					String sha256KeyPass = _hash(keyPassword);
+					sha256KeyPass = _hash(keyPassword);
 					keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
 					pvtKey_encrypted = encrypt_AES(privKey_64, keyEncryptionKey);
 					service.createKey(userID, keyID, pvtKey_encrypted);
@@ -392,11 +404,12 @@ public class CryptoController {
 				}
 				data.put(keyID, pubKey_64); // still need to store this in the user, send it to them on reg
 
-				System.out.println();
-				service.getKeyValueById(keyID);
+				// System.out.println(service.getKeyValueById(keyID).equals(pvtKey_encrypted));
 
-				System.out.println(privKey_64.equals(decrypt_AES(pvtKey_encrypted, keyEncryptionKey)));
-				
+				pvtKey_encrypted = service.getKeyValueById(keyID); // here
+				// System.out.println(privKey_64.equals(decrypt_AES(pvtKey_encrypted,
+				// keyEncryptionKey)));
+
 				String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey);
 
 				KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -404,19 +417,9 @@ public class CryptoController {
 				EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoder.decode(unencryptedPrivateKey));
 				PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
 
-				// EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(pubKey_64.getBytes());
-				// PublicKey publicKey2 = keyFactory.generatePublic(publicKeySpec);
+				String encrytpedText = encrypt_RSA("hello", privateKey2);
+				System.out.println(encrytpedText);
 
-
-				// System.out.println("*************************************");
-				 String encrytpedText = encrypt_RSA("hello", privateKey2);
-				 System.out.println(encrytpedText);
-				// System.out.println("***************************************");
-
-
-
-			//	String plaintext = KVC_PASSPHRASE;
-			//	String kekVerificationCode = encrypt_AES(plaintext, keyEncryptionKey); // store this, use it.
 			} catch (Exception e) {
 				e.printStackTrace();
 				data.put("Response", 500 + "");

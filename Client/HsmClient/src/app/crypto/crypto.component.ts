@@ -18,8 +18,8 @@ export class CryptoComponent implements OnInit {
   eKeyID = '';
 
   constructor(private http: HttpClient,
-    private formBuilder: FormBuilder,
-    private apiService: ApiService) { }
+              private formBuilder: FormBuilder,
+              private apiService: ApiService) { }
 
   ngOnInit(): void {
     this.keyForm = this.formBuilder.group({
@@ -58,7 +58,7 @@ export class CryptoComponent implements OnInit {
 
           this._updateData(this.publicKey);
           this._updateFunction('Public Key:');
-          this._updateDisplayedData('yep');
+          this._updateDisplayedData('yte');
         }
       },
     );
@@ -87,17 +87,23 @@ export class CryptoComponent implements OnInit {
    */
   public onEncrypt() {
     const testText = 'Encrypt Me';
-    const testKeyPassword = 'myPassword';
+
     const url = 'http://localhost:8080/encrypt';
     this.http.get(url,
       {
         params: new HttpParams().set('text', testText)
           .append('eKeyID', this.eKeyID)
-          .append('keyPassword', testKeyPassword)
+          .append('keyPassword', this.keyForm.get('keyPassword').value)
       },
     ).subscribe(
       (res: Response) => {
         console.log(res);
+        // this.publicKey = Object.values(res)[0];
+        // this.eKeyID = Object.keys(res)[0];
+
+        this._updateData(Object.values(res)[0]);
+        this._updateFunction('Encrypted Text:');
+        this._updateDisplayedData('Affirmative');
       },
     );
   }
