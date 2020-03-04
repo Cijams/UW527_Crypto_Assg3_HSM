@@ -2,10 +2,10 @@
   <app-top-bar></app-top-bar>
 </div>
 
-<div style="min-width: 1000px; max-width: 1150px; padding-top: 1px; margin-top: 1px;">
+<div style="min-height: 1200px; min-width: 1200px; max-width: 1350px; padding-top: 1px; margin-top: 1px; overflow: hidden;">
 
   <!-- main content container -->
-  <div style="float: left; width: 600px; height: 500px" class="jumbotron">
+  <div style="float: left; width: 500px; height: 500px" class="jumbotron">
     <div class="container">
       <div class="row">
         <div style="margin-left: 20px;" class="col-sm-8 offset-sm-2">
@@ -16,8 +16,8 @@
   </div>
 
   <span *ngIf="dataExists">
-    <div style="float: right; width: 500px; height: 500px; padding-top: 27px;" class="jumbotron">
-      <div style="margin-left: 20px; margin-top: 20px; padding-top: 1px; padding-bottom: 1px;"
+    <div style="display: inline-block; width: 500px; height: 500px; padding-top: 27px;" class="jumbotron">
+      <div style="margin-left: 150px; margin-top: 20px; padding-top: 1px; padding-bottom: 1px;"
         class="col-sm-8 offset-sm-2">
         <app-data></app-data>
       </div>
