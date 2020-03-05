@@ -30,7 +30,7 @@
                         <div>
                             <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
                                 (click)="onDecrypt()">Decrypt</button>
-                            <input type="text" formControlName="textToDecrypt" placeholder="Decrypt">
+                            <input type="text" formControlName="textToDecrypt" placeholder="Decrypt" [(ngModel)]="decData">
                         </div>
                     </div>
                 </div>

@@ -17,6 +17,7 @@ export class CryptoComponent implements OnInit {
   hashForm: FormGroup;
   signForm: FormGroup;
 
+  decData;
   text; // Testing text for ensuring calls work REMOVE ME
   publicKey = 'Key goes here';
   eKeyID = '';
@@ -231,6 +232,6 @@ export class CryptoComponent implements OnInit {
   }
 
   public onShiftText() {
-
+    this.decData = this.publicKey;
   }
 }
