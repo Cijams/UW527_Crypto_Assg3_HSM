@@ -68,13 +68,53 @@ public class CryptoController {
 	 */
 	@CrossOrigin
 	@GetMapping("/hash")
-	public ResponseEntity<String> hashWeb() throws NoSuchAlgorithmException {
+	public Map<String, String> hashWeb(@RequestParam String textToHash) throws NoSuchAlgorithmException {
+		HashMap<String, String> hashedData = new HashMap<>();
 		byte[] sha2 = new byte[0];
 		StringBuilder hexString = null;
-		sha2 = generateSha2(Math.random() + ""); // Accep user input
+		sha2 = generateSha2(textToHash);
 		// Convert SHA-2 to hexadecimal
 		hexString = _generateHex(sha2);
-		return new ResponseEntity<String>(hexString.toString(), HttpStatus.OK);
+		hashedData.put("Hash:", hexString.toString());
+		return hashedData;
+	}
+
+	@CrossOrigin
+	@GetMapping("/sign")
+	@ResponseBody
+	public Map<String, String> digitalSignature(@RequestParam String textToHash, @RequestParam String eKeyID,
+			@RequestParam String keyPassword) throws Exception {
+		HashMap<String, String> hashedData = new HashMap<>();
+		Base64.Decoder decoder = Base64.getDecoder();
+		Base64.Encoder encoder = Base64.getEncoder();
+
+		System.out.println(textToHash);
+		System.out.println(eKeyID);
+		System.out.println(keyPassword);
+		String sha256KeyPass = _hash(keyPassword);
+
+		String keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
+
+		String pvtKey_encrypted = service.getKeyValueById(eKeyID);
+
+		String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey);
+
+		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+		EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoder.decode(unencryptedPrivateKey));
+		PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
+
+		byte[] sha2 = new byte[0];
+		StringBuilder hexString = null;
+		sha2 = generateSha2(textToHash);
+
+		Cipher cipher = Cipher.getInstance("RSA");
+		cipher.init(Cipher.ENCRYPT_MODE, privateKey2);
+		byte[] digitalSignature = cipher.doFinal(sha2);
+
+		String rds = encoder.encodeToString(digitalSignature);
+
+		hashedData.put("Signature", rds);
+		return hashedData;
 	}
 
 	private String _hash(String input) throws NoSuchAlgorithmException {
@@ -123,34 +163,41 @@ public class CryptoController {
 	@GetMapping("/decrypt")
 	@ResponseBody
 	public Map<String, String> decrypt(@RequestParam String publicKey, @RequestParam String keyPassword,
-			@RequestParam String cipherText) throws Exception {
+			@RequestParam String cipherText, @RequestParam String eKeyID) throws Exception {
 		HashMap<String, String> data = new HashMap<>();
 		Base64.Decoder decoder = Base64.getDecoder();
+
+		// byte[] dataBytes = Base64.getMimeDecoder().decode(publicKey);
+		publicKey = publicKey.replace(" ", "+");
+		// System.out.println(publicKey);
+		// System.out.println(keyPassword);
+		// System.out.println(cipherText);
+		// System.out.println(eKeyID);
 
 		// System.out.println(publicKey);
 		// System.out.println("\n");
 		// System.out.println(keyPassword);
 		// System.out.println("\n");
 		// System.out.println(cipherText);
+		// System.out.println(publicKey);
 
-				System.out.println(publicKey);
 
-		// String sha256KeyPass = _hash(keyPassword);
-		// String keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "",
-		// sha256KeyPass);
+		String sha256KeyPass = _hash(keyPassword);
+		String keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
 
-		// // String pvtKey_encrypted = service.getKeyValueById(eKeyID);
+		String pvtKey_encrypted = service.getKeyValueById(eKeyID);
+		String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey); // here
 
-		// // String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted,
-		// keyEncryptionKey); // here
+		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+		// System.out.println(publicKey);
 
-	//	KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-		//EncodedKeySpec publicKeySpec = new PKCS8EncodedKeySpec(decoder.decode(publicKey));
-		//PublicKey publicKey2 = keyFactory.generatePublic(publicKeySpec);
-		//String decryptedText = decrypt_RSA("hello", publicKey2);
+		EncodedKeySpec publicKeySpec = new PKCS8EncodedKeySpec(decoder.decode(publicKey));
+		PublicKey publicKey2 = keyFactory.generatePublic(publicKeySpec);
+		// String decryptedText = decrypt_RSA(cipherText, publicKey2);
+
 		// System.out.println("ANSWER IS:");
 		// System.out.println(encrytpedText);
-		// data.put("Encrypted:", encrytpedText);
+		// data.put("Decrypted:", decryptedText);
 		return data;
 	}
 
@@ -176,7 +223,7 @@ public class CryptoController {
 
 		String pvtKey_encrypted = service.getKeyValueById(eKeyID);
 
-		String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey); // here
+		String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey);
 
 		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 		EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoder.decode(unencryptedPrivateKey));
@@ -217,9 +264,11 @@ public class CryptoController {
 		List users = null;
 		List keys = null;
 		User aUser = null;
+		int length = 0;
 
 		users = service.findAllUsers();
 
+		System.out.println("TEST TEST 2");
 		for (int i = 0; i < users.size(); i++) {
 			String addedKey = "";
 			aUser = (User) users.get(i);
@@ -227,9 +276,11 @@ public class CryptoController {
 			if (keys != null && !keys.isEmpty()) {
 				addedKey = aUser.getKeys().toString();
 			}
-			reportData.put(("User: " + aUser + ""), (addedKey.substring(0, 20) + "..."));
+			reportData.put(("User: " + aUser + ""),
+					(addedKey.substring(0, addedKey.length() >= 20 ? 20 : addedKey.length()) + " . . . "));
 		}
 
+		System.out.println("TEST TREE");
 		System.out.println(reportData.toString());
 		return reportData;
 	}
@@ -268,22 +319,24 @@ public class CryptoController {
 		}
 	}
 
-	@CrossOrigin
-	@GetMapping("/sign")
-	@ResponseBody
-	public Map<String, String> sign(@RequestParam String text, @RequestParam String eKeyID,
-			@RequestParam String keyPassword) throws Exception {
-		HashMap<String, String> data = new HashMap<>();
+	// @CrossOrigin
+	// @GetMapping("/sign")
+	// @ResponseBody
+	// public Map<String, String> sign(@RequestParam String text, @RequestParam
+	// String eKeyID,
+	// @RequestParam String keyPassword) throws Exception {
+	// HashMap<String, String> data = new HashMap<>();
 
-		String pvtKey = service.getKeyValueById(eKeyID);
-		byte[] decodedKey = Base64.getDecoder().decode(pvtKey);
-		PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decodedKey));
+	// String pvtKey = service.getKeyValueById(eKeyID);
+	// byte[] decodedKey = Base64.getDecoder().decode(pvtKey);
+	// PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new
+	// PKCS8EncodedKeySpec(decodedKey));
 
-		String signature = sign(text, privateKey);
+	// String signature = sign(text, privateKey);
 
-		data.put("Signature", signature);
-		return data;
-	}
+	// data.put("Signature", signature);
+	// return data;
+	// }
 
 	@CrossOrigin
 	@GetMapping("/verify")
@@ -371,7 +424,7 @@ public class CryptoController {
 	private boolean _ensureMasterKeyEstablished() throws NoSuchAlgorithmException {
 		boolean masterKeyStatus = false;
 		if (service.getMasterKey() == null) {
-			String hashForMasterKey = _hash("masterKeyPassword"); // TODO put in own method
+			String hashForMasterKey = _hash("masterKeyPassword");
 			service.setMasterKey(hashForMasterKey);
 			masterKeyStatus = true;
 		}
@@ -438,7 +491,6 @@ public class CryptoController {
 				}
 				data.put(keyID, pubKey_64); // still need to store this in the user, send it to them on reg
 
-
 				pvtKey_encrypted = service.getKeyValueById(keyID);
 
 				String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey);
@@ -449,15 +501,10 @@ public class CryptoController {
 				PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
 
 				String encrytpedText = encrypt_RSA("hello", privateKey2);
-				//System.out.println(encrytpedText);
-
+				// System.out.println(encrytpedText);
 
 				System.out.println(pubKey_64);
 				EncodedKeySpec publicKeySpec = new PKCS8EncodedKeySpec(decoder.decode(pubKey_64));
-
-
-
-
 
 			} catch (Exception e) {
 				e.printStackTrace();

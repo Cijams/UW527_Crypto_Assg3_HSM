@@ -23,8 +23,8 @@ export class CryptoComponent implements OnInit {
   keyPass = '';
 
   constructor(private http: HttpClient,
-              private formBuilder: FormBuilder,
-              private apiService: ApiService) { }
+    private formBuilder: FormBuilder,
+    private apiService: ApiService) { }
 
   ngOnInit(): void {
     this.keyForm = this.formBuilder.group({
@@ -132,15 +132,13 @@ export class CryptoComponent implements OnInit {
         params: new HttpParams().set('publicKey', this.publicKey)
           .append('keyPassword', this.keyPass)
           .append('cipherText', cipherText)
+          .append('eKeyID', this.eKeyID)
       },
     ).subscribe(
       (res: Response) => {
         console.log(res);
-        // this.publicKey = Object.values(res)[0];
-        // this.eKeyID = Object.keys(res)[0];
-
         this._updateData(Object.values(res)[0]);
-        this._updateFunction('Encrypted Text:');
+        this._updateFunction('Decrypted Text:');
         this._updateDisplayedData('Affirmative');
       },
     );
@@ -154,30 +152,34 @@ export class CryptoComponent implements OnInit {
   public onHash() {
     const url = 'http://localhost:8080/hash';
     this.http.get(url,
-      { responseType: 'text' }).subscribe(
-        res => {
-          this.text = res;
-          console.log(res);
-        },
-      );
+      {
+        params: new HttpParams().set('textToHash', this.hashForm.get('textToHash').value)
+      },
+    ).subscribe(
+      (res) => {
+        this._updateData(Object.values(res)[0]);
+        this._updateFunction('Hash:');
+        this._updateDisplayedData('Affirmative');
+      },
+    );
   }
 
   /**
    * Creates a digital signature from an established symmetric key.
    */
   public onSign() {
-    const testText = 'Encrypt Me';
-    const testKeyPassword = 'myPassword';
     const url = 'http://localhost:8080/sign';
     this.http.get(url,
       {
-        params: new HttpParams().set('text', testText)
+        params: new HttpParams().set('textToHash', this.signForm.get('textToSign').value)
           .append('eKeyID', this.eKeyID)
-          .append('keyPassword', testKeyPassword)
+          .append('keyPassword', this.keyPass)
       },
     ).subscribe(
       (res: Response) => {
-        console.log(res);
+        this._updateData(Object.values(res)[0]);
+        this._updateFunction('Signature:');
+        this._updateDisplayedData('Affirmative');
       },
     );
   }
@@ -209,22 +211,26 @@ export class CryptoComponent implements OnInit {
   public onGenReport() {
     const url = 'http://localhost:8080/generateReport';
     this.http.get(url,
-      {
-        params: new HttpParams().set('keyPassword', this.keyForm.get('keyPassword').value)
-      },
+      //  {
+      //  params: new HttpParams().set('keyPassword', this.keyForm.get('keyPassword').value)
+      //  },
     ).subscribe(
       (res) => {
         let print = '';
         for (const [key, value] of Object.entries(res)) {
-          print += (`${key}: ${value}` + ' | ');
+          print += (`${key}: ${value}` + '  ');
         }
         console.log(res);
-        //this.publicKey = print;
+        this.publicKey = print;
 
         this._updateData(print);
         this._updateFunction('Report:');
         this._updateDisplayedData('Affirmative');
       },
     );
+  }
+
+  public onShiftText() {
+
   }
 }
