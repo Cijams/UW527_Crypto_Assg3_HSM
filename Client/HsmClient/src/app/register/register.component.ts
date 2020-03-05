@@ -58,7 +58,7 @@ export class RegisterComponent implements OnInit {
         // console.log(returnValues);
 
         if (!!returnValues[0]) {
-          this.openSnackBar('Registration Successful, Please log in.', 'OK');
+          this.openSnackBar('Registration Successful.', 'OK');
           this.route.navigate(['/login']);
 
         } else {

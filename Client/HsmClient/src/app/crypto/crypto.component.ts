@@ -24,8 +24,8 @@ export class CryptoComponent implements OnInit {
   keyPass = '';
 
   constructor(private http: HttpClient,
-    private formBuilder: FormBuilder,
-    private apiService: ApiService) { }
+              private formBuilder: FormBuilder,
+              private apiService: ApiService) { }
 
   ngOnInit(): void {
     this.keyForm = this.formBuilder.group({
