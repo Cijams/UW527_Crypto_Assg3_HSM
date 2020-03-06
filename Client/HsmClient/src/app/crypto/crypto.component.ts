@@ -1,9 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiService } from '../api.service';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, SelectControlValueAccessor } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
 import { ThrowStmt } from '@angular/compiler';
+
+interface eKeys {
+  value: string;
+  viewValue: string;
+}
 
 @Component({
   selector: 'app-crypto',
@@ -11,6 +16,11 @@ import { ThrowStmt } from '@angular/compiler';
   styleUrls: ['./crypto.component.css']
 })
 export class CryptoComponent implements OnInit {
+
+    displayKeys: eKeys[] = [
+      {value: '', viewValue: ''},
+    ];
+    keyRing: FormGroup;
   keyForm: FormGroup;
   encryptForm: FormGroup;
   decryptForm: FormGroup;
@@ -22,6 +32,7 @@ export class CryptoComponent implements OnInit {
   publicKey = 'Key goes here';
   eKeyID = '';
   keyPass = '';
+  publicKeyRing = '';
 
   constructor(private http: HttpClient,
               private formBuilder: FormBuilder,
@@ -42,6 +53,9 @@ export class CryptoComponent implements OnInit {
     });
     this.signForm = this.formBuilder.group({
       textToSign: [''],
+    });
+    this.keyRing = this.formBuilder.group({
+      displayKeys: [''],
     });
   }
 
@@ -68,17 +82,51 @@ export class CryptoComponent implements OnInit {
         if (Object.values(res)[0] + '' === '500') {
           console.log('Key failed to generate');
         } else {
-
+          this.publicKeyRing = Object.keys(res)[0];
           this.publicKey = Object.values(res)[0]; // TODO Store on db.
           this.eKeyID = Object.keys(res)[0];
 
+
           this._updateData(this.publicKey);
-          this._updateFunction('Public Key:');
-          this._updateDisplayedData('yte');
+          if(this.publicKeyRing !== 'False') {
+            this._updateFunction('Public Key:');
+            this.displayKeys.push({value: Object.keys(res)[0], viewValue: Object.keys(res)[0]});
+         //   this.keyRing.patchValue({value: 'key-1', viewValue: Object.keys(res)[0]});
+          } else {
+            this._updateFunction('Warning:');
+          }
+          this._updateDisplayedData('Affirmative');
         }
       },
     );
   }
+
+  // public getPublicKeys() {
+  //   const url = 'http://localhost:8080/getPublicKeys';
+
+  //   this.http.get(url,
+  //     {
+  //       params: new HttpParams().set('keyPassword', this.keyForm.get('keyPassword').value)
+  //         .append('userID', this.apiService.getRegisteredUser())
+  //     },
+  //   ).subscribe(
+  //     (res: Response) => {
+  //       if (Object.values(res)[0] + '' === '500') {
+  //         console.log('Key failed to generate');
+  //       } else {
+  //         this.publicKeyRing = Object.keys(res)[0];
+  //         this.publicKey = Object.values(res)[0]; // TODO Store on db.
+  //         this.eKeyID = Object.keys(res)[0];
+
+  //         this._updateData(this.publicKey);
+  //         this._updateFunction('Public Key:');
+  //         this._updateDisplayedData('yte');
+  //       }
+  //     },
+  //   );
+  // }
+
+
 
   /**
    *  Shows the public key for the user.
@@ -121,6 +169,22 @@ export class CryptoComponent implements OnInit {
       },
     );
   }
+
+  public getPubKeys(selected: SelectControlValueAccessor) {
+    const url = 'http://localhost:8080/getPubKeys';
+    this.http.get(url,
+      {
+        params: new HttpParams().set('eKeyID', selected.value)
+      },
+    ).subscribe(
+      (res: Response) => {
+        this._updateData(Object.values(res)[0]);
+        this._updateFunction('Public Key:');
+        this._updateDisplayedData('Affirmative');
+      },
+    );
+  }
+
 
   /**
    *  FIll me in

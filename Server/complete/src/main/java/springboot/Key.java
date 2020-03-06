@@ -18,6 +18,7 @@ public class Key {
 	@Id
     private String keyId;
 	
+	private String publicKeyValue;
 	private String value;
 	private String kvc;
 	
@@ -56,6 +57,10 @@ public class Key {
 		return value;
 	}
 
+	public String getPublicValue() {
+		return publicKeyValue;
+	}
+
 	public void setKeyId(String keyId) {
 		this.keyId = keyId;
 	}
@@ -66,6 +71,10 @@ public class Key {
 
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	public void setPublicKeyValue(String publicKeyValue) {
+		this.publicKeyValue = publicKeyValue;
 	}
 		
 	@Override

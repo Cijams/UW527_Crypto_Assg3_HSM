@@ -12,6 +12,15 @@ public interface PersistenceService {
 	 * @return The current state of the newly-created Key
 	 */
 	public Key createKey( String userName, String keyId, String keyValue );
+
+		/**
+	 * Create a new Key for a specific User
+	 * @param userName The ID of the User that will own the new Key
+	 * @param keyId The ID of the new Key
+	 * @param keyValue The value of the new Key
+	 * @return The current state of the newly-created Key
+	 */
+	public Key createKey( String userName, String keyId, String keyValue, String publicKeyValue);
 	
 	/**
 	 * Create a new user and store to the database
@@ -68,6 +77,13 @@ public interface PersistenceService {
 	 * @return The value of the requested Key
 	 */
 	public String getKeyValueById( String keyId );
+
+	/**
+	 * Convenience method to obtain public key value by ID rather than getting entire object
+	 * @param keyId The ID of the Key to obtain
+	 * @return The public key value of the requested Key
+	 */
+	public String getPublicKeyValueById( String keyId );
 
 	/**
 	 * Get the "master" Key from the database
