@@ -188,7 +188,6 @@ export class CryptoComponent implements OnInit {
     );
   }
 
-
   /**
    *  FIll me in
    */

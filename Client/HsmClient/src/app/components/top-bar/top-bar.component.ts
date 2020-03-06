@@ -21,6 +21,7 @@ export class TopBarComponent implements OnInit {
 
   onHomeButton() {
     this.apiService.updateDisplayedData(null);
+    this. loggedInUser = null;
   }
 
 }

@@ -479,6 +479,12 @@ public class CryptoController {
 		HashMap<String, String> data = new HashMap<>();
 		Base64.Encoder encoder = Base64.getEncoder();
 		Base64.Decoder decoder = Base64.getDecoder();
+
+		if(keyPassword.length() < 1) {
+			data.put("False", "Enter a password for key generation.");
+			return data;
+		}
+
 		if (_validateUser(userID)) {
 			// Generate a key pair.
 			try {
