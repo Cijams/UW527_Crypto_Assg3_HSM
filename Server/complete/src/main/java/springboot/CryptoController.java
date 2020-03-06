@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -87,6 +88,17 @@ public class CryptoController {
 		String keyLookup = service.getPublicKeyValueById(eKeyID);
 		returnKey.put("Public key", keyLookup);
 		return returnKey;
+	}
+
+	@CrossOrigin
+	@GetMapping("/getKeyIDs")
+	@ResponseBody
+	public Map<String, List<String>> getKeyIDs(@RequestParam String userID) throws NoSuchAlgorithmException {
+		HashMap<String, List<String>> returnKeys = new HashMap<>();
+		System.out.println(userID);
+		System.out.println(service.getKeyIdsByUsername(userID));
+		returnKeys.put("User ID keys", service.getKeyIdsByUsername(userID));
+		return returnKeys;
 	}
 
 	@CrossOrigin
@@ -386,6 +398,7 @@ public class CryptoController {
 			throws NoSuchAlgorithmException {
 		HashMap<String, String> data = new HashMap<>();
 		try {
+			service.getKeyIdsByUsername(userID).toString();
 			// Ensure valid user credentials are being sent.
 			boolean validUserCredentials = this._validateUserCredentials(userID, password);
 			if (validUserCredentials == true) {

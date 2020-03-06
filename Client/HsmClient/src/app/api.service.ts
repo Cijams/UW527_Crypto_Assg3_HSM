@@ -8,6 +8,8 @@ const localUrl = 'http://localhost:8080/hello-world';
   providedIn: 'root'
 })
 export class ApiService {
+  currentUserKeyIDs = [];
+
   // Displayed user.
   private displayedUser = new BehaviorSubject<string>('');
   displayUser = this.displayedUser.asObservable();

@@ -40,17 +40,34 @@ export class HsmLoginComponent implements OnInit {
       },
     ).subscribe(
       (res: Response) => {
+
+        console.log(res);
+
         const registrationStatus = Object.values(res)[0];
         const incomingUserID = Object.keys(res)[0].toString();
 
         if (registrationStatus === 'true') {
           this.apiService.setRegisteredUser(incomingUserID);
           this.apiService.updateDisplayedUser(this.loginForm.get('userID').value);
+          this.getKeyIDs();
           this.route.navigate(['/crypto']);
         } else {
           console.log('Failed to register user');
           this.isHidden = false;
         }
+      },
+    );
+  }
+
+  public getKeyIDs() {
+    const url = 'http://localhost:8080/getKeyIDs';
+    this.http.get(url,
+      {
+        params: new HttpParams().set('userID', this.apiService.registeredUser)
+      },
+    ).subscribe(
+      (res: Response) => {
+        this.apiService.currentUserKeyIDs = Object.values(res);
       },
     );
   }

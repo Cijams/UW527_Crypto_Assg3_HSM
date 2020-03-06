@@ -27,8 +27,10 @@ export class CryptoComponent implements OnInit {
   hashForm: FormGroup;
   signForm: FormGroup;
 
+  currentUserIDKeys;
   currentlySelectedKey;
   cipherText;
+
 
   decData;
   text; // Testing text for ensuring calls work REMOVE ME
@@ -60,6 +62,14 @@ export class CryptoComponent implements OnInit {
     this.keyRing = this.formBuilder.group({
       displayKeys: [''],
     });
+
+    this.populateKeyIDLOV();
+  }
+
+  public populateKeyIDLOV() {
+    this.currentUserIDKeys = this.apiService.currentUserKeyIDs;
+    console.log(this.currentUserIDKeys);
+//  this.displayKeys.push({value: Object.keys(res)[0], viewValue: Object.keys(res)[0]});
   }
 
   /**
@@ -128,8 +138,6 @@ export class CryptoComponent implements OnInit {
   //     },
   //   );
   // }
-
-
 
   /**
    *  Shows the public key for the user.
