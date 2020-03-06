@@ -66,9 +66,17 @@ export class CryptoComponent implements OnInit {
     this.populateKeyIDLOV();
   }
 
+
+
+  // Pick up here, get the lov's into the form field. Then just clean up.
+
   public populateKeyIDLOV() {
     this.currentUserIDKeys = this.apiService.currentUserKeyIDs;
     console.log(this.currentUserIDKeys);
+    // tslint:disable-next-line: prefer-for-of
+    for (let i = 0; i < Object.values(this.currentUserIDKeys).length; i++) {
+      console.log(i);
+    }
 //  this.displayKeys.push({value: Object.keys(res)[0], viewValue: Object.keys(res)[0]});
   }
 
@@ -101,7 +109,7 @@ export class CryptoComponent implements OnInit {
 
 
           this._updateData(this.publicKey);
-          if(this.publicKeyRing !== 'False') {
+          if (this.publicKeyRing !== 'False') {
             this._updateFunction('Public Key:');
             this.displayKeys.push({value: Object.keys(res)[0], viewValue: Object.keys(res)[0]});
          //   this.keyRing.patchValue({value: 'key-1', viewValue: Object.keys(res)[0]});

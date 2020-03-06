@@ -50,7 +50,6 @@ export class HsmLoginComponent implements OnInit {
           this.apiService.setRegisteredUser(incomingUserID);
           this.apiService.updateDisplayedUser(this.loginForm.get('userID').value);
           this.getKeyIDs();
-          this.route.navigate(['/crypto']);
         } else {
           console.log('Failed to register user');
           this.isHidden = false;
@@ -68,6 +67,7 @@ export class HsmLoginComponent implements OnInit {
     ).subscribe(
       (res: Response) => {
         this.apiService.currentUserKeyIDs = Object.values(res);
+        this.route.navigate(['/crypto']);
       },
     );
   }
