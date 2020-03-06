@@ -40,10 +40,11 @@ public class PersistenceServiceImplTest {
     public void createDeleteKey() {
     	
     	String keyId = "OpenVMS";
-    	String keyValue = "Forever";
+    	String keyValue = "ForeverForever";
     	
     	// create the key
     	Key newKey = service.createKey( testUser2.getUserName(), keyId, keyValue );
+    	String s = newKey.toString();
     	
     	// retrieve the test user again
     	User user = service.getUserByUsername( testUser2.getUserName() );
@@ -174,5 +175,26 @@ public class PersistenceServiceImplTest {
     	assertThat( userCopy.getPasswordHash() ).as( "Password field change must be persisted!" ).isEqualTo( newFieldValue );
     	
     }
+	
+	@Test
+	public void getKeyIdsByUsername() {
+		
+		// create a couple of Keys
+    	String key1Id = "OpenVMS";
+    	String key1Value = "ForeverForever";
+    	String key2Id = "Jaguar";
+    	String key2Value = "XJ6";
+    	service.createKey( testUser2.getUserName(), key1Id, key1Value );
+    	service.createKey( testUser2.getUserName(), key2Id, key2Value );
+
+    	// get the Key IDs
+    	List< String > ids = service.getKeyIdsByUsername( testUser2.getUserName() );
+		
+    	// should have two keys
+    	assertThat( ids.size() ).as( "Should be two Key IDs associated with test user #2!" ).isEqualTo( 2 );
+		assertThat( ids.contains( key1Id )).as( "Key #1 ID should be one of the key IDs returned!" ).isTrue();
+		assertThat( ids.contains( key2Id )).as( "Key #2 ID should be one of the key IDs returned!" ).isTrue();
+    	
+	}
 	
 }
