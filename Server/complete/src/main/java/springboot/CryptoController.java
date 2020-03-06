@@ -114,7 +114,7 @@ public class CryptoController {
 		PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
 
 		byte[] sha2 = new byte[0];
-		//StringBuilder hexString = null;
+		// StringBuilder hexString = null;
 		sha2 = generateSha2(textToSign);
 
 		Cipher cipher = Cipher.getInstance("RSA");
@@ -172,45 +172,41 @@ public class CryptoController {
 	@CrossOrigin
 	@GetMapping("/decrypt")
 	@ResponseBody
-	public Map<String, String> decrypt(@RequestParam String publicKey, @RequestParam String keyPassword,
-			@RequestParam String cipherText, @RequestParam String eKeyID) throws Exception {
+	public Map<String, String> decrypt(@RequestParam String keyPassword, @RequestParam String cipherText,
+			@RequestParam String eKeyID) throws Exception {
 		HashMap<String, String> data = new HashMap<>();
 		Base64.Decoder decoder = Base64.getDecoder();
 
-		String test = service.getPublicKeyValueById(eKeyID);
-		System.out.println(test);
+		String key = service.getPublicKeyValueById(eKeyID);
+		System.out.println(key);
 
-		// byte[] dataBytes = Base64.getMimeDecoder().decode(publicKey);
-		// publicKey = publicKey.replace(" ", "+");
-		// // System.out.println(publicKey);
-		// System.out.println(keyPassword);
-		// System.out.println(cipherText);
-		// System.out.println(eKeyID);
+		byte[] pubKeySeed = Base64.getDecoder().decode(key);
+		PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pubKeySeed));
 
-		// System.out.println(publicKey);
-		// System.out.println("\n");
-		// System.out.println(keyPassword);
-		// System.out.println("\n");
-		// System.out.println(cipherText);
-		// System.out.println(publicKey);
+		// byte[] dataBytes =  Base64.getMimeDecoder().decode(key);
+
+		// X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getDecoder().decode(dataBytes));
+
+		//byte[] keyBytes = key.getBytes();
+		// byte[] dataBytes =  Base64.getMimeDecoder().decode(key);
+
+		// X509EncodedKeySpec spec =
+		//   new X509EncodedKeySpec(dataBytes);
+		// KeyFactory kf = KeyFactory.getInstance("RSA");
+		// System.out.println(kf.generatePublic(spec));
+		// PublicKey pki = kf.generatePublic(spec);
 
 
-		// String sha256KeyPass = _hash(keyPassword);
-		// String keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
+		// System.out.println();
+		// System.out.println("____");
+		// System.out.println(spec);
+		// System.out.println("____");
+		// System.out.println();
 
-		// String pvtKey_encrypted = service.getKeyValueById(eKeyID);
-		// String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey); // here
 
-		// KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-		// // System.out.println(publicKey);
+		String decryptedText = decrypt_RSA(cipherText, publicKey);
 
-		// EncodedKeySpec publicKeySpec = new PKCS8EncodedKeySpec(decoder.decode(publicKey));
-		// PublicKey publicKey2 = keyFactory.generatePublic(publicKeySpec);
-		// // String decryptedText = decrypt_RSA(cipherText, publicKey2);
-
-		// System.out.println("ANSWER IS:");
-		// System.out.println(encrytpedText);
-		// data.put("Decrypted:", decryptedText);
+		data.put("Decrypted:", decryptedText);
 		return data;
 	}
 
@@ -230,7 +226,6 @@ public class CryptoController {
 		HashMap<String, String> data = new HashMap<>();
 		Base64.Decoder decoder = Base64.getDecoder();
 
-
 		System.out.println("1");
 		String sha256KeyPass = _hash(keyPassword);
 
@@ -246,7 +241,7 @@ public class CryptoController {
 			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 			EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoder.decode(unencryptedPrivateKey));
 			PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
-			encrytpedText = encrypt_RSA("hello", privateKey2);
+			encrytpedText = encrypt_RSA(text, privateKey2);
 		} catch (Exception e) {
 			data.put("False", "Unable to encrypt data. Password and key ID do not match.");
 			return data;
@@ -265,13 +260,12 @@ public class CryptoController {
 	}
 
 	public static String decrypt_RSA(String cipherText, PublicKey publicKey) throws Exception {
+		cipherText = cipherText.replace(" ", "+");
 		byte[] bytes = Base64.getDecoder().decode(cipherText);
-
 		Cipher decriptCipher = Cipher.getInstance("RSA");
 		decriptCipher.init(Cipher.DECRYPT_MODE, publicKey);
-
 		return new String(decriptCipher.doFinal(bytes), UTF_8);
-	}
+	  }
 
 	/**
 	 * Generates a report summarizing the status of the HSM. A list of the
@@ -404,7 +398,7 @@ public class CryptoController {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			System.err.println("Login failed");
-			
+
 			data.put("Login Status", false + "");
 			return data;
 		}
@@ -480,7 +474,7 @@ public class CryptoController {
 		Base64.Encoder encoder = Base64.getEncoder();
 		Base64.Decoder decoder = Base64.getDecoder();
 
-		if(keyPassword.length() < 1) {
+		if (keyPassword.length() < 1) {
 			data.put("False", "Enter a password for key generation.");
 			return data;
 		}
@@ -502,7 +496,7 @@ public class CryptoController {
 
 				// Generate a keyID.
 				String keyID = calcKeyID(keyPassword, userID);
-				if(service.getKeyValueById(keyID) != null) {
+				if (service.getKeyValueById(keyID) != null) {
 					data.put("False", "A key with that password already exists.");
 					return data;
 				}

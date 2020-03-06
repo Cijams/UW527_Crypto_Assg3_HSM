@@ -28,6 +28,7 @@ export class CryptoComponent implements OnInit {
   signForm: FormGroup;
 
   currentlySelectedKey;
+  cipherText;
 
   decData;
   text; // Testing text for ensuring calls work REMOVE ME
@@ -164,8 +165,8 @@ export class CryptoComponent implements OnInit {
         console.log(res);
         // this.publicKey = Object.values(res)[0];
         // this.eKeyID = Object.keys(res)[0];
-
-        this._updateData(Object.values(res)[0]);
+        this.cipherText = Object.values(res)[0];
+        this._updateData(this.cipherText);
         this._updateFunction('Encrypted Text:');
         this._updateDisplayedData('Affirmative');
       },
@@ -196,10 +197,9 @@ export class CryptoComponent implements OnInit {
     const url = 'http://localhost:8080/decrypt';
     this.http.get(url,
       {
-        params: new HttpParams().set('publicKey', this.publicKey)
-          .append('keyPassword', this.keyPass)
-          .append('cipherText', cipherText)
-          .append('eKeyID', this.eKeyID)
+        params: new HttpParams().set('keyPassword', this.keyPass)
+          .append('cipherText', this.decryptForm.get('textToDecrypt').value)
+          .append('eKeyID', this.currentlySelectedKey)
       },
     ).subscribe(
       (res: Response) => {
@@ -298,6 +298,6 @@ export class CryptoComponent implements OnInit {
   }
 
   public onShiftText() {
-    this.decData = this.publicKey;
+    this.decData = this.cipherText;
   }
 }
