@@ -112,4 +112,11 @@ public interface PersistenceService {
 	 */
 	public User updateUser( User user );
 	
+	/**
+	 * Get the Key IDs associated with a specified user
+	 * @param username The username of the user to obtain keys from
+	 * @return The Key IDs associated with the user
+	 */
+	public List< String > getKeyIdsByUsername( String username );
+	
 }

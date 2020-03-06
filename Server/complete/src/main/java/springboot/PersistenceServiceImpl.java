@@ -1,5 +1,7 @@
 package springboot;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -211,6 +213,20 @@ public class PersistenceServiceImpl implements PersistenceService {
 	@Override
 	public User updateUser( User user ) {
 		return userDao.save( user );
+	}
+
+
+	@Override
+	public List<String> getKeyIdsByUsername(String username) {
+		
+		// get the specified User
+		User user = getUserByUsername( username );
+		
+		// user found?
+		if ( user == null ) return new ArrayList< String >();
+		
+		 return user.getKeys().stream().map( k -> k.getKeyId() ).collect( Collectors.toList() );
+		 
 	}
 	
 }
