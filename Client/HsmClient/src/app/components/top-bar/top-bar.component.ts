@@ -8,15 +8,19 @@ import { ApiService } from 'src/app/api.service';
 })
 export class TopBarComponent implements OnInit {
   loggedInUser;
-  constructor(private apiservice: ApiService) { }
+  constructor(private apiService: ApiService) { }
 
   ngOnInit(): void {
     this.subscribeToUserName();
   }
   subscribeToUserName() {
-    this.apiservice.displayUser.subscribe((userName) => {
+    this.apiService.displayUser.subscribe((userName) => {
       this.loggedInUser = userName;
     });
+  }
+
+  onHomeButton() {
+    this.apiService.updateDisplayedData(null);
   }
 
 }

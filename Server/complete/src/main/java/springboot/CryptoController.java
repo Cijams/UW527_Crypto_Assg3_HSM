@@ -92,13 +92,13 @@ public class CryptoController {
 	@CrossOrigin
 	@GetMapping("/sign")
 	@ResponseBody
-	public Map<String, String> digitalSignature(@RequestParam String textToHash, @RequestParam String eKeyID,
+	public Map<String, String> digitalSignature(@RequestParam String textToSign, @RequestParam String eKeyID,
 			@RequestParam String keyPassword) throws Exception {
 		HashMap<String, String> hashedData = new HashMap<>();
 		Base64.Decoder decoder = Base64.getDecoder();
 		Base64.Encoder encoder = Base64.getEncoder();
 
-		System.out.println(textToHash);
+		System.out.println(textToSign);
 		System.out.println(eKeyID);
 		System.out.println(keyPassword);
 		String sha256KeyPass = _hash(keyPassword);
@@ -114,8 +114,8 @@ public class CryptoController {
 		PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
 
 		byte[] sha2 = new byte[0];
-		StringBuilder hexString = null;
-		sha2 = generateSha2(textToHash);
+		//StringBuilder hexString = null;
+		sha2 = generateSha2(textToSign);
 
 		Cipher cipher = Cipher.getInstance("RSA");
 		cipher.init(Cipher.ENCRYPT_MODE, privateKey2);
@@ -230,6 +230,8 @@ public class CryptoController {
 		HashMap<String, String> data = new HashMap<>();
 		Base64.Decoder decoder = Base64.getDecoder();
 
+
+		System.out.println("1");
 		String sha256KeyPass = _hash(keyPassword);
 
 		String keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
@@ -238,11 +240,17 @@ public class CryptoController {
 
 		String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey);
 
-		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-		EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoder.decode(unencryptedPrivateKey));
-		PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
-		String encrytpedText = encrypt_RSA("hello", privateKey2);
-
+		System.out.println("2");
+		String encrytpedText = "";
+		try {
+			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+			EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoder.decode(unencryptedPrivateKey));
+			PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
+			encrytpedText = encrypt_RSA("hello", privateKey2);
+		} catch (Exception e) {
+			data.put("False", "Unable to encrypt data. Password and key ID do not match.");
+			return data;
+		}
 		data.put("Encrypted:", encrytpedText);
 		return data;
 	}

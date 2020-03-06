@@ -27,6 +27,8 @@ export class CryptoComponent implements OnInit {
   hashForm: FormGroup;
   signForm: FormGroup;
 
+  currentlySelectedKey;
+
   decData;
   text; // Testing text for ensuring calls work REMOVE ME
   publicKey = 'Key goes here';
@@ -154,8 +156,8 @@ export class CryptoComponent implements OnInit {
     this.http.get(url,
       {
         params: new HttpParams().set('text', this.encryptForm.get('textToEncrypt').value)
-          .append('eKeyID', this.eKeyID)
-          .append('keyPassword', this.keyPass)
+          .append('eKeyID', this.currentlySelectedKey)
+          .append('keyPassword', this.keyForm.get('keyPassword').value)
       },
     ).subscribe(
       (res: Response) => {
@@ -170,7 +172,8 @@ export class CryptoComponent implements OnInit {
     );
   }
 
-  public getPubKeys(selected: SelectControlValueAccessor) {
+  public onDropdownSelection(selected: SelectControlValueAccessor) {
+    this.currentlySelectedKey = selected.value;
     const url = 'http://localhost:8080/getPubKeys';
     this.http.get(url,
       {
@@ -179,7 +182,7 @@ export class CryptoComponent implements OnInit {
     ).subscribe(
       (res: Response) => {
         this._updateData(Object.values(res)[0]);
-        this._updateFunction('Public Key:');
+        this._updateFunction('Key ID: ' + this.currentlySelectedKey + ' | Public Key:');
         this._updateDisplayedData('Affirmative');
       },
     );
@@ -236,9 +239,9 @@ export class CryptoComponent implements OnInit {
     const url = 'http://localhost:8080/sign';
     this.http.get(url,
       {
-        params: new HttpParams().set('textToHash', this.signForm.get('textToSign').value)
+        params: new HttpParams().set('textToSign', this.signForm.get('textToSign').value)
           .append('eKeyID', this.eKeyID)
-          .append('keyPassword', this.keyPass)
+          .append('keyPassword',  this.keyForm.get('keyPassword').value)
       },
     ).subscribe(
       (res: Response) => {

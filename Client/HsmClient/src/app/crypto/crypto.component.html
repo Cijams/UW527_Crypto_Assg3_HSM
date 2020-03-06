@@ -13,11 +13,20 @@
                 <div style="padding-top: 10px;" class="form-group" [formGroup]="keyForm">
                     <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
                         (click)="onGenerateKeys()">Generate Keys</button>
-                    <input type="text" formControlName="keyPassword" placeholder="Key Password">
+
+                        <mat-form-field appearance="legacy">
+                            <mat-label>Key Password</mat-label>
+                            <input matInput formControlName="keyPassword">
+                          </mat-form-field>
+
+                    <!-- <input type="text" formControlName="keyPassword" placeholder="Key Password"> -->
+
+
+
 
                     <mat-form-field style="padding-left: 10px;" [formGroup]="keyRing">
                         <mat-label>Key ID:</mat-label>
-                        <select #selected class="form-control" formControlName="displayKeys" matNativeControl (change)="getPubKeys(selected)">
+                        <select #selected class="form-control" formControlName="displayKeys" matNativeControl (change)="onDropdownSelection(selected)">
                           <option *ngFor="let key of displayKeys" [value]="key.value">
                             {{key.value}}
                           </option>
