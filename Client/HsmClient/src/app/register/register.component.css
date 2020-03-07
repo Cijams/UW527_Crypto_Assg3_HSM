@@ -1,5 +1,5 @@
 #loginFormat {
-    background-color:#F0F0F0;
+    background-color: #F0F0F0;
     margin-top: 30px;
     border-radius: 15px;
 }
@@ -20,7 +20,7 @@
     background-color: #7F0000;
     padding-right: 15px;
     color: white;
-    
+
 }
 
 .loginBtn {
@@ -41,7 +41,7 @@
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     border-width: 3px;
-    border-top: 0px ;
+    border-top: 0px;
     border-color: #505050;
     overflow: hidden;
 }
@@ -50,7 +50,7 @@ h1 {
     color: black;
 }
 
-.red-snackbar{
+.red-snackbar {
     background-color: rgb(153, 50, 50);
-    color:lightgoldenrodyellow;
-  }
+    color: lightgoldenrodyellow;
+}

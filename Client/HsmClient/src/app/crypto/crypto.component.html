@@ -8,40 +8,26 @@
         <mat-tab-group>
             <!-- Start of tab -->
             <mat-tab label="Keys and Encryption">
-
                 <!-- Button to initiate generation of public-private key pair. -->
                 <div style="padding-top: 10px;" class="form-group" [formGroup]="keyForm">
                     <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
                         (click)="onGenerateKeys()">Generate Keys</button>
 
-                        <mat-form-field appearance="legacy">
-                            <mat-label>Key Password</mat-label>
-                            <input matInput formControlName="keyPassword">
-                          </mat-form-field>
-
-                    <!-- <input type="text" formControlName="keyPassword" placeholder="Key Password"> -->
-
-
-
+                    <mat-form-field appearance="legacy">
+                        <mat-label>Key Password</mat-label>
+                        <input matInput formControlName="keyPassword">
+                    </mat-form-field>
 
                     <mat-form-field style="padding-left: 10px;" [formGroup]="keyRing">
                         <mat-label>Key ID:</mat-label>
-                        <select #selected class="form-control" formControlName="displayKeys" matNativeControl (change)="onDropdownSelection(selected)">
-                          <option *ngFor="let key of displayKeys" [value]="key.value">
-                            {{key.value}}
-                          </option>
+                        <select #selected class="form-control" formControlName="displayKeys" matNativeControl
+                            (change)="onDropdownSelection(selected)">
+                            <option *ngFor="let key of displayKeys" [value]="key.value">
+                                {{key.value}}
+                            </option>
                         </select>
-                      </mat-form-field>
-
+                    </mat-form-field>
                 </div>
-
-<!-- 
-                <mat-option *ngFor="let food of foods" [value]="food.value">
-                    {{food.viewValue}}
-                  </mat-option> -->
-
-
-
 
                 <div class="form-group" [formGroup]="encryptForm">
                     <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
@@ -49,34 +35,33 @@
                     <input type="text" formControlName="textToEncrypt" placeholder="Encrypt">
                     <button mat-icon-button title="Send encrypted text to decrypt field.">
                         <mat-icon (click)="onShiftText()">arrow_downward</mat-icon>
-                      </button>
+                    </button>
                 </div>
 
                 <div class="form-group" [formGroup]="decryptForm">
                     <div style="float: left;">
                         <div>
-                            <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
-                                (click)="onDecrypt()">Decrypt</button>
-                            <input type="text" formControlName="textToDecrypt" placeholder="Decrypt" [(ngModel)]="decData">
+                            <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;"
+                                mat-raised-button (click)="onDecrypt()">Decrypt</button>
+                            <input type="text" formControlName="textToDecrypt" placeholder="Decrypt"
+                                [(ngModel)]="decData">
                         </div>
                     </div>
                 </div>
-                <!-- End of Tab -->
             </mat-tab>
 
             <mat-tab style="overflow: hidden;" label="Hash, Sign and Reports">
                 <div style="padding-top: 10px; overflow:hidden;" class="form-group">
 
-
                     <div style="padding-top: 10px;" class="form-group" [formGroup]="hashForm">
-                        <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
-                            (click)="onHash()">Hash</button>
+                        <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;"
+                            mat-raised-button (click)="onHash()">Hash</button>
                         <input type="text" formControlName="textToHash" placeholder="Hash">
                     </div>
 
                     <div class="form-group" [formGroup]="signForm">
-                        <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;" mat-raised-button
-                            (click)="onSign()">Sign</button>
+                        <button id="btn" style="color:white !important; width: 125px; margin-right: 15px;"
+                            mat-raised-button (click)="onSign()">Sign</button>
                         <input type="text" formControlName="textToSign" placeholder="Sign">
                     </div>
 
@@ -84,12 +69,9 @@
                         <button id="btn" style="color:white !important; width: 125px;" mat-raised-button
                             (click)="onGenReport()">Get Report</button>
                     </div>
+
                 </div>
             </mat-tab>
-
         </mat-tab-group>
     </div>
-
-
-
 </div>

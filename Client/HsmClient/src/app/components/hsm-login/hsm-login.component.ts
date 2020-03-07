@@ -5,7 +5,6 @@ import { first } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiService } from 'src/app/api.service';
 
-
 @Component({
   selector: 'app-hsm-login',
   templateUrl: './hsm-login.component.html',
@@ -40,9 +39,6 @@ export class HsmLoginComponent implements OnInit {
       },
     ).subscribe(
       (res: Response) => {
-
-        console.log(res);
-
         const registrationStatus = Object.values(res)[0];
         const incomingUserID = Object.keys(res)[0].toString();
 
@@ -51,7 +47,6 @@ export class HsmLoginComponent implements OnInit {
           this.apiService.updateDisplayedUser(this.loginForm.get('userID').value);
           this.getKeyIDs();
         } else {
-          console.log('Failed to register user');
           this.isHidden = false;
         }
       },

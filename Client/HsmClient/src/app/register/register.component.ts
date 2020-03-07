@@ -51,11 +51,7 @@ export class RegisterComponent implements OnInit {
         } else {
           console.log('Failed to register user');
         }
-
-        // const returnKeys = Object.keys(res);
         const returnValues = Object.values(res);
-        // console.log(returnKeys);
-        // console.log(returnValues);
 
         if (!!returnValues[0]) {
           this.openSnackBar('Registration Successful.', 'OK');

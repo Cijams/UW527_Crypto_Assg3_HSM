@@ -3,8 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiService } from '../api.service';
 import { FormGroup, SelectControlValueAccessor } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
-import { ThrowStmt } from '@angular/compiler';
 
+// tslint:disable-next-line: class-name
 interface eKeys {
   value: string;
   viewValue: string;
@@ -20,6 +20,7 @@ export class CryptoComponent implements OnInit {
   displayKeys: eKeys[] = [
     { value: '', viewValue: '' },
   ];
+
   keyRing: FormGroup;
   keyForm: FormGroup;
   encryptForm: FormGroup;
@@ -31,9 +32,8 @@ export class CryptoComponent implements OnInit {
   currentlySelectedKey;
   cipherText;
 
-
   decData;
-  text; // Testing text for ensuring calls work REMOVE ME
+  text;
   publicKey = 'Key goes here';
   eKeyID = '';
   keyPass = '';
@@ -44,36 +44,42 @@ export class CryptoComponent implements OnInit {
               private apiService: ApiService) { }
 
   ngOnInit(): void {
+    // Various forms for processing.
     this.keyForm = this.formBuilder.group({
       keyPassword: [''],
     });
+
     this.encryptForm = this.formBuilder.group({
       textToEncrypt: [''],
     });
+
     this.decryptForm = this.formBuilder.group({
       textToDecrypt: [''],
     });
+
     this.hashForm = this.formBuilder.group({
       textToHash: [''],
     });
+
     this.signForm = this.formBuilder.group({
       textToSign: [''],
     });
+
     this.keyRing = this.formBuilder.group({
       displayKeys: [''],
     });
-
+    // Populate the previously generated keys dropdown.
     this.populateKeyIDLOV();
   }
 
-  // Pick up here, get the lov's into the form field. Then just clean up.
-
+  /**
+   * Get all the keys the user has previously generated.
+   */
   public populateKeyIDLOV() {
     this.currentUserIDKeys = this.apiService.currentUserKeyIDs;
-   // console.log(this.currentUserIDKeys);
     // tslint:disable-next-line: prefer-for-of
     for (let i = 0; i < Object.values(this.currentUserIDKeys[0]).length; i++) {
-      this.displayKeys.push({value: Object.values(this.currentUserIDKeys)[0][i], viewValue:5+''});
+      this.displayKeys.push({ value: Object.values(this.currentUserIDKeys)[0][i], viewValue: 5 + '' });
     }
   }
 
@@ -98,18 +104,14 @@ export class CryptoComponent implements OnInit {
     ).subscribe(
       (res: Response) => {
         if (Object.values(res)[0] + '' === '500') {
-          console.log('Key failed to generate');
         } else {
           this.publicKeyRing = Object.keys(res)[0];
-          this.publicKey = Object.values(res)[0]; // TODO Store on db.
+          this.publicKey = Object.values(res)[0];
           this.eKeyID = Object.keys(res)[0];
-
-
           this._updateData(this.publicKey);
           if (this.publicKeyRing !== 'False') {
             this._updateFunction('Public Key:');
             this.displayKeys.push({ value: Object.keys(res)[0], viewValue: Object.keys(res)[0] });
-            //   this.keyRing.patchValue({value: 'key-1', viewValue: Object.keys(res)[0]});
           } else {
             this._updateFunction('Warning:');
           }
@@ -119,31 +121,6 @@ export class CryptoComponent implements OnInit {
     );
   }
 
-  // public getPublicKeys() {
-  //   const url = 'http://localhost:8080/getPublicKeys';
-
-  //   this.http.get(url,
-  //     {
-  //       params: new HttpParams().set('keyPassword', this.keyForm.get('keyPassword').value)
-  //         .append('userID', this.apiService.getRegisteredUser())
-  //     },
-  //   ).subscribe(
-  //     (res: Response) => {
-  //       if (Object.values(res)[0] + '' === '500') {
-  //         console.log('Key failed to generate');
-  //       } else {
-  //         this.publicKeyRing = Object.keys(res)[0];
-  //         this.publicKey = Object.values(res)[0]; // TODO Store on db.
-  //         this.eKeyID = Object.keys(res)[0];
-
-  //         this._updateData(this.publicKey);
-  //         this._updateFunction('Public Key:');
-  //         this._updateDisplayedData('yte');
-  //       }
-  //     },
-  //   );
-  // }
-
   /**
    *  Shows the public key for the user.
    */
@@ -151,10 +128,16 @@ export class CryptoComponent implements OnInit {
     this.apiService.updatedDataSelection(data);
   }
 
+  /**
+   * updates what operation was just performed.
+   */
   private _updateFunction(data: string) {
     this.apiService.updateLastFunctionCalled(data);
   }
 
+  /**
+   * Shows what operation was just performed.
+   */
   private _updateDisplayedData(data: string) {
     this.apiService.updateDisplayedData(data);
   }
@@ -175,9 +158,6 @@ export class CryptoComponent implements OnInit {
       },
     ).subscribe(
       (res: Response) => {
-        console.log(res);
-        // this.publicKey = Object.values(res)[0];
-        // this.eKeyID = Object.keys(res)[0];
         this.cipherText = Object.values(res)[0];
         this._updateData(this.cipherText);
         this._updateFunction('Encrypted Text:');
@@ -186,6 +166,9 @@ export class CryptoComponent implements OnInit {
     );
   }
 
+  /**
+   * Updates which key is being applied corrosponding to the dropdown menu item.
+   */
   public onDropdownSelection(selected: SelectControlValueAccessor) {
     this.currentlySelectedKey = selected.value;
     const url = 'http://localhost:8080/getPubKeys';
@@ -203,7 +186,7 @@ export class CryptoComponent implements OnInit {
   }
 
   /**
-   *  FIll me in
+   *  Invokes the decryption process.
    */
   public onDecrypt() {
     const cipherText = this.apiService.getData();
@@ -216,7 +199,6 @@ export class CryptoComponent implements OnInit {
       },
     ).subscribe(
       (res: Response) => {
-        console.log(res);
         this._updateData(Object.values(res)[0]);
         this._updateFunction('Decrypted Text:');
         this._updateDisplayedData('Affirmative');
@@ -279,7 +261,6 @@ export class CryptoComponent implements OnInit {
       },
     ).subscribe(
       (res: Response) => {
-        console.log(res);
       },
     );
   }
@@ -291,18 +272,13 @@ export class CryptoComponent implements OnInit {
   public onGenReport() {
     const url = 'http://localhost:8080/generateReport';
     this.http.get(url,
-      //  {
-      //  params: new HttpParams().set('keyPassword', this.keyForm.get('keyPassword').value)
-      //  },
     ).subscribe(
       (res) => {
         let print = '';
         for (const [key, value] of Object.entries(res)) {
           print += (`${key}: ${value}` + '  ');
         }
-        console.log(res);
         this.publicKey = print;
-
         this._updateData(print);
         this._updateFunction('Report:');
         this._updateDisplayedData('Affirmative');
