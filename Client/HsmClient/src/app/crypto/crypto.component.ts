@@ -17,10 +17,10 @@ interface eKeys {
 })
 export class CryptoComponent implements OnInit {
 
-    displayKeys: eKeys[] = [
-      {value: '', viewValue: ''},
-    ];
-    keyRing: FormGroup;
+  displayKeys: eKeys[] = [
+    { value: '', viewValue: '' },
+  ];
+  keyRing: FormGroup;
   keyForm: FormGroup;
   encryptForm: FormGroup;
   decryptForm: FormGroup;
@@ -72,12 +72,11 @@ export class CryptoComponent implements OnInit {
 
   public populateKeyIDLOV() {
     this.currentUserIDKeys = this.apiService.currentUserKeyIDs;
-    console.log(this.currentUserIDKeys);
+   // console.log(this.currentUserIDKeys);
     // tslint:disable-next-line: prefer-for-of
-    for (let i = 0; i < Object.values(this.currentUserIDKeys).length; i++) {
-      console.log(i);
+    for (let i = 0; i < Object.values(this.currentUserIDKeys[0]).length; i++) {
+      this.displayKeys.push({value: Object.values(this.currentUserIDKeys)[0][i], viewValue:5+''});
     }
-//  this.displayKeys.push({value: Object.keys(res)[0], viewValue: Object.keys(res)[0]});
   }
 
   /**
@@ -111,8 +110,8 @@ export class CryptoComponent implements OnInit {
           this._updateData(this.publicKey);
           if (this.publicKeyRing !== 'False') {
             this._updateFunction('Public Key:');
-            this.displayKeys.push({value: Object.keys(res)[0], viewValue: Object.keys(res)[0]});
-         //   this.keyRing.patchValue({value: 'key-1', viewValue: Object.keys(res)[0]});
+            this.displayKeys.push({ value: Object.keys(res)[0], viewValue: Object.keys(res)[0] });
+            //   this.keyRing.patchValue({value: 'key-1', viewValue: Object.keys(res)[0]});
           } else {
             this._updateFunction('Warning:');
           }
@@ -256,7 +255,7 @@ export class CryptoComponent implements OnInit {
       {
         params: new HttpParams().set('textToSign', this.signForm.get('textToSign').value)
           .append('eKeyID', this.eKeyID)
-          .append('keyPassword',  this.keyForm.get('keyPassword').value)
+          .append('keyPassword', this.keyForm.get('keyPassword').value)
       },
     ).subscribe(
       (res: Response) => {
