@@ -37,12 +37,13 @@ public class PersistenceServiceImpl implements PersistenceService {
 
 
 	@Override
-	public Key createKey(String userName, String keyId, String keyValue, String publicKeyValue) {
+	public Key createKey(String userName, String keyId, String keyValue, String publicKeyValue, String kvc) {
 		
 		Key newKey = new Key();
 		newKey.setKeyId( keyId );
 		newKey.setValue( keyValue );
 		newKey.setPublicKeyValue(publicKeyValue);
+		newKey.setKvc(kvc);
 
 		User user = getUserByUsername( userName );
 		if ( user == null ) return null;	// no user by that ID found!
@@ -180,6 +181,24 @@ public class PersistenceServiceImpl implements PersistenceService {
 			// is the specified key ID associated with this user?
 			for ( Key key : user.getKeys() ) {
 				if ( key.getKeyId().equalsIgnoreCase( keyId )) return key.getPublicValue();
+			}
+			
+		}
+		
+		// key wasn't found
+		return null;
+		
+	}
+
+	@Override
+	public String getKvcById(String keyId) {
+		
+		// I'm sure there is a better way to query Mongo for this, but this is quick and simple
+		for ( User user : userDao.findAll() ) {
+	
+			// is the specified key ID associated with this user?
+			for ( Key key : user.getKeys() ) {
+				if ( key.getKeyId().equalsIgnoreCase( keyId )) return key.getKvc();
 			}
 			
 		}

@@ -13,29 +13,22 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.KeyStore.PrivateKeyEntry;
 import java.security.spec.EncodedKeySpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -48,7 +41,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @RestController
 public class CryptoController {
+
 	private static final String KVC_PASSPHRASE = "test";
+	private static final String MASTERPASSWORD = "masterKeyPassword";
 	PublicKey TEMPPUBKEY;
 
 	@Autowired
@@ -65,7 +60,7 @@ public class CryptoController {
 	}
 
 	/**
-	 * Generates a SHA-256 value.
+	 * Generates a SHA-256 hash value.
 	 */
 	@CrossOrigin
 	@GetMapping("/hash")
@@ -80,6 +75,13 @@ public class CryptoController {
 		return hashedData;
 	}
 
+/**
+ * Returns the public keys associated with a user.
+ * 
+ * @param eKeyID The key ID used for public key lookup.
+ * @return A public key.
+ * @throws NoSuchAlgorithmException
+ */
 	@CrossOrigin
 	@GetMapping("/getPubKeys")
 	@ResponseBody
@@ -90,6 +92,13 @@ public class CryptoController {
 		return returnKey;
 	}
 
+/**
+ * Returns the key ID's associated with a user.
+ * 
+ * @param userID The userID for lookup.
+ * @return The associated key ID's.
+ * @throws NoSuchAlgorithmException
+ */
 	@CrossOrigin
 	@GetMapping("/getKeyIDs")
 	@ResponseBody
@@ -101,6 +110,15 @@ public class CryptoController {
 		return returnKeys;
 	}
 
+	/**
+	 * Creates a digital signature based on user supplied input.
+	 * 
+	 * @param textToSign
+	 * @param eKeyID
+	 * @param keyPassword
+	 * @return
+	 * @throws Exception
+	 */
 	@CrossOrigin
 	@GetMapping("/sign")
 	@ResponseBody
@@ -195,26 +213,25 @@ public class CryptoController {
 		byte[] pubKeySeed = Base64.getDecoder().decode(key);
 		PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pubKeySeed));
 
-		// byte[] dataBytes =  Base64.getMimeDecoder().decode(key);
+		// byte[] dataBytes = Base64.getMimeDecoder().decode(key);
 
-		// X509EncodedKeySpec spec = new X509EncodedKeySpec(Base64.getDecoder().decode(dataBytes));
+		// X509EncodedKeySpec spec = new
+		// X509EncodedKeySpec(Base64.getDecoder().decode(dataBytes));
 
-		//byte[] keyBytes = key.getBytes();
-		// byte[] dataBytes =  Base64.getMimeDecoder().decode(key);
+		// byte[] keyBytes = key.getBytes();
+		// byte[] dataBytes = Base64.getMimeDecoder().decode(key);
 
 		// X509EncodedKeySpec spec =
-		//   new X509EncodedKeySpec(dataBytes);
+		// new X509EncodedKeySpec(dataBytes);
 		// KeyFactory kf = KeyFactory.getInstance("RSA");
 		// System.out.println(kf.generatePublic(spec));
 		// PublicKey pki = kf.generatePublic(spec);
-
 
 		// System.out.println();
 		// System.out.println("____");
 		// System.out.println(spec);
 		// System.out.println("____");
 		// System.out.println();
-
 
 		String decryptedText = decrypt_RSA(cipherText, publicKey);
 
@@ -238,46 +255,74 @@ public class CryptoController {
 		HashMap<String, String> data = new HashMap<>();
 		Base64.Decoder decoder = Base64.getDecoder();
 
-		System.out.println("1");
-		String sha256KeyPass = _hash(keyPassword);
-
-		String keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
-
-		String pvtKey_encrypted = service.getKeyValueById(eKeyID);
-
-		String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey);
-
-		System.out.println("2");
-		String encrytpedText = "";
 		try {
-			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-			EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoder.decode(unencryptedPrivateKey));
-			PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
-			encrytpedText = encrypt_RSA(text, privateKey2);
+			// Regenerate the SHA256 key and key encryption key.
+			String sha256KeyPass = _hash(keyPassword);
+			String keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
+
+			// Generate the key verification code and ensure the correct KEK.
+			String kvc = service.getKvcById(eKeyID);
+			boolean kvcResult = confirmKVC(kvc, KVC_PASSPHRASE, keyEncryptionKey);
+			if (kvcResult != true) {
+				data.put("KVC FAILURE", "Key Verification Code comparison failed.");
+				return data;
+			}
+
+			// Regenerate the encrypted RSA private key from the vHSM database using user
+			// credentials.
+			String pvtKey_encrypted = service.getKeyValueById(eKeyID);
+			String unencryptedPrivateKey = decrypt_AES(pvtKey_encrypted, keyEncryptionKey);
+			String encrytpedText = "";
+			try {
+				KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+				EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoder.decode(unencryptedPrivateKey));
+				PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
+
+				// Encrypt the incoming plaintext.
+				encrytpedText = encrypt_RSA(text, privateKey2);
+			} catch (Exception e) {
+				data.put("False", "Unable to encrypt data. Password and key ID do not match.");
+				return data;
+			}
+			data.put("Encrypted:", encrytpedText);
+			return data;
 		} catch (Exception e) {
-			data.put("False", "Unable to encrypt data. Password and key ID do not match.");
+			data.put("Failer", "Failure to encrypt.");
 			return data;
 		}
-		data.put("Encrypted:", encrytpedText);
-		return data;
 	}
 
+	/**
+	 * Use the RSA algorithm to encrypt the incoming plaintext.
+	 * 
+	 * @param plainText The text to be encrypted.
+	 * @param privateKey The private RSA key used to encrypt.
+	 * @return	The ciphertext result of RSA encryption.
+	 * @throws Exception
+	 */
 	public static String encrypt_RSA(String plainText, PrivateKey privateKey) throws Exception {
 		Cipher encryptCipher = Cipher.getInstance("RSA");
 		encryptCipher.init(Cipher.ENCRYPT_MODE, privateKey);
-
 		byte[] cipherText = encryptCipher.doFinal(plainText.getBytes(UTF_8));
 
 		return Base64.getEncoder().encodeToString(cipherText);
 	}
 
+	/**
+	 * Use the RSA algorithm to decrypt the incoming ciphertext.
+	 * 
+	 * @param cipherText The text to be decrypted.
+	 * @param publicKey The public RSA key used to decrypt.
+	 * @return The plaintext result of RSA decryption.
+	 * @throws Exception
+	 */
 	public static String decrypt_RSA(String cipherText, PublicKey publicKey) throws Exception {
 		cipherText = cipherText.replace(" ", "+");
 		byte[] bytes = Base64.getDecoder().decode(cipherText);
 		Cipher decriptCipher = Cipher.getInstance("RSA");
 		decriptCipher.init(Cipher.DECRYPT_MODE, publicKey);
 		return new String(decriptCipher.doFinal(bytes), UTF_8);
-	  }
+	}
 
 	/**
 	 * Generates a report summarizing the status of the HSM. A list of the
@@ -453,7 +498,7 @@ public class CryptoController {
 	private boolean _ensureMasterKeyEstablished() throws NoSuchAlgorithmException {
 		boolean masterKeyStatus = false;
 		if (service.getMasterKey() == null) {
-			String hashForMasterKey = _hash("masterKeyPassword");
+			String hashForMasterKey = _hash(MASTERPASSWORD);
 			service.setMasterKey(hashForMasterKey);
 			masterKeyStatus = true;
 		}
@@ -524,7 +569,8 @@ public class CryptoController {
 					sha256KeyPass = _hash(keyPassword);
 					keyEncryptionKey = _xorHex(service.getMasterKey().getValue() + "", sha256KeyPass);
 					pvtKey_encrypted = encrypt_AES(privKey_64, keyEncryptionKey);
-					service.createKey(userID, keyID, pvtKey_encrypted, pubKey_64);
+					String kvc = encrypt_AES(KVC_PASSPHRASE, keyEncryptionKey);
+					service.createKey(userID, keyID, pvtKey_encrypted, pubKey_64, kvc);
 				} catch (Exception e) {
 					e.printStackTrace(System.err);
 				}
@@ -539,8 +585,7 @@ public class CryptoController {
 				EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decoder.decode(unencryptedPrivateKey));
 				PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
 
-				String encrytpedText = encrypt_RSA("hello", privateKey2);
-				// System.out.println(encrytpedText);
+				// KVC Generation.
 
 				System.out.println(pubKey_64);
 				EncodedKeySpec publicKeySpec = new PKCS8EncodedKeySpec(decoder.decode(pubKey_64));

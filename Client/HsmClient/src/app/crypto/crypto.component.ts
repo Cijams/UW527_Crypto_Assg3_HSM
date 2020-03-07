@@ -66,8 +66,6 @@ export class CryptoComponent implements OnInit {
     this.populateKeyIDLOV();
   }
 
-
-
   // Pick up here, get the lov's into the form field. Then just clean up.
 
   public populateKeyIDLOV() {

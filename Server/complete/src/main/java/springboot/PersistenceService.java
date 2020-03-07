@@ -13,14 +13,21 @@ public interface PersistenceService {
 	 */
 	public Key createKey( String userName, String keyId, String keyValue );
 
-		/**
+	/**
 	 * Create a new Key for a specific User
 	 * @param userName The ID of the User that will own the new Key
 	 * @param keyId The ID of the new Key
 	 * @param keyValue The value of the new Key
 	 * @return The current state of the newly-created Key
 	 */
-	public Key createKey( String userName, String keyId, String keyValue, String publicKeyValue);
+	public Key createKey(String userName, String keyId, String keyValue, String publicKeyValue, String kvc);
+
+	/**
+	 * The key verification code
+ 	* @param keyId The ID of the Key
+ 	* @return a KVC
+ 	*/
+	public String getKvcById(String keyId);
 	
 	/**
 	 * Create a new user and store to the database
